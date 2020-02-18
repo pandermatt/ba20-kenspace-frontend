@@ -1,4 +1,6 @@
-# ba20-kenspace-frontend
+# BA20 KenSpace Frontend
+
+![Deploy to GitHub Pages](https://github.com/pandermatt/ba20-kenspace-frontend/workflows/Deploy%20to%20GitHub%20Pages/badge.svg?branch=master)
 
 ## Project setup
 ```
