@@ -51,4 +51,5 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
 # Contributors
 
 ![](https://avatars2.githubusercontent.com/u/20790833?s=20) Pascal Andermatt
-![](https://avatars2.githubusercontent.com/u/33753120?s=20) Stefan Brunner
+
+![]() Stefan Brunner
