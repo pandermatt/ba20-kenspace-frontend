@@ -22,8 +22,7 @@
       </div>
     </div>
 
-    <!--    TODO make this position absolute :D-->
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
+    <svg class="wave" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
       <path
         fill="#0099ff"
         fill-opacity="1"
@@ -75,6 +74,11 @@ export default {
 .info-message {
   position: relative;
   top: -80px;
+}
+
+.wave {
+  position: relative;
+  top: 10px;
 }
 
 footer {
