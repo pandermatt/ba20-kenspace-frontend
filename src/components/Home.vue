@@ -15,10 +15,14 @@
       <div class="jumbotron info-message">
         <h1 class="display-4">Sorry!</h1>
         <p class="lead">
-          This Page is currently only accessible to registered beta user.
+          This page is currently only accessible for registered beta users.
         </p>
+        <hr class="my-4" />
+        <a href="/">Click here if you have received a beta key</a>
       </div>
     </div>
+
+    <!--    TODO make this position absolute :D-->
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
       <path
         fill="#0099ff"
@@ -28,7 +32,19 @@
     </svg>
     <footer>
       <div class="container">
-        <h1>Hello World</h1>
+        <div class="container">
+          <div class="row">
+            <div class="col-sm">
+              <p class="lead">KenSpace</p>
+            </div>
+            <div class="col-sm">
+              <p class="author">
+                Pascal Andermatt<br />
+                Stefan Brunner
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </footer>
   </div>
@@ -65,5 +81,11 @@ footer {
   color: white;
   background-color: $footer-blue;
   padding: 100px 0;
+
+  .author {
+    @media (min-width: 576px) {
+      text-align: right;
+    }
+  }
 }
 </style>
