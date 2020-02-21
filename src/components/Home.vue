@@ -7,16 +7,16 @@
             <b class="logo">KenSpace</b>
             <span class="badge badge-secondary">Beta</span>
           </h1>
-          <p>
-            Hello! {{ apiKey }}
-            <a v-on:click="logout" href="#" v-if="apiKey">Logout</a>
-          </p>
+          <div v-if="apiKey">
+            <p><b>Hello!</b> Your Token: {{ apiKey }}</p>
+            <a v-on:click="logout" href="#">Logout</a>
+          </div>
         </div>
       </div>
     </div>
     <div class="container" v-if="!apiKey">
-      <div class="jumbotron info-message">
-        <h1 class="display-4">Sorry! {{ apiKey }}</h1>
+      <div class="jumbotron home-box">
+        <h1 class="display-4">Sorry!</h1>
         <p class="lead">
           This page is currently only accessible for registered beta users.
         </p>
@@ -25,6 +25,43 @@
           >Click here if you have received a beta key</a
         >
       </div>
+    </div>
+    <div v-if="apiKey" class="home-box">
+      <div
+        class="hamburger"
+        id="hamburger-circle"
+        v-bind:class="{ active: showMobileMenu }"
+        v-on:click="showMobileMenu = !showMobileMenu"
+      >
+        <span class="line"></span>
+        <span class="line"></span>
+        <span class="line"></span>
+      </div>
+      <div class="wrapper">
+        <!-- Sidebar -->
+        <nav id="sidebar" v-bind:class="{ active: showMobileMenu }">
+          <div class="jumbotron">
+            <h1 class="display-4">Facette 🥳</h1>
+          </div>
+        </nav>
+
+        <!-- Page Content -->
+        <div id="content" v-bind:class="{ active: showMobileMenu }">
+          <div class="jumbotron" v-for="index in 10" :key="index">
+            <h1 class="display-4">Item 🥳</h1>
+          </div>
+        </div>
+      </div>
+      <!--      <div class="row info-message">-->
+      <!--        <div class="col-md-4">-->
+      <!--          -->
+      <!--        </div>-->
+      <!--        <div class="col-md-8">-->
+      <!--          <div class="jumbotron" v-for="index in 10" :key="index">-->
+      <!--            <h1 class="display-4">Item 🥳</h1>-->
+      <!--          </div>-->
+      <!--        </div>-->
+      <!--      </div>-->
     </div>
 
     <svg class="wave" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
@@ -49,7 +86,8 @@ export default {
   },
   data: function() {
     return {
-      apiKey: ""
+      apiKey: "",
+      showMobileMenu: false
     };
   },
   methods: {
@@ -71,8 +109,7 @@ export default {
         }
       });
 
-      //todo safe password to localstorage :D
-      if (password === "Pascal") {
+      if (password === "7C991E25649BD5F8F9D6A1AC9FFF3") {
         this.apiKey = password;
         Swal.fire({
           icon: "success",
@@ -133,6 +170,49 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
+.wrapper {
+  display: flex;
+  align-items: stretch;
+
+  #content {
+    width: 100%;
+    padding: 0 50px;
+  }
+}
+
+#sidebar {
+  min-width: 30vw;
+  max-width: 30vw;
+  margin-left: 50px;
+  transition: all 0.3s;
+}
+
+@media (max-width: 768px) {
+  #sidebar {
+    margin-left: -300px;
+    min-width: 300px;
+    max-width: 300px;
+    transition: all 0.3s;
+  }
+  #sidebar.active {
+    margin-left: 0;
+    transition: all 0.3s;
+  }
+  .wrapper {
+    overflow-x: hidden;
+
+    #content {
+      padding: 0 5px;
+      transition: all 0.3s;
+
+      &.active {
+        transition: all 0.3s;
+        min-width: 600px;
+      }
+    }
+  }
+}
+
 .logo {
   color: $main-blue;
   font-size: 50px;
@@ -144,7 +224,7 @@ export default {
   background-color: #f6f8fc;
 }
 
-.info-message {
+.home-box {
   position: relative;
   top: -80px;
 }
@@ -152,5 +232,83 @@ export default {
 .wave {
   position: relative;
   top: 10px;
+}
+
+.hamburger .line {
+  @media (min-width: 768px) {
+    opacity: 0;
+  }
+  width: 30px;
+  height: 3px;
+  background-color: black;
+  display: block;
+  opacity: 1;
+  margin: 5px auto;
+  -webkit-transition: all 0.3s ease-in-out;
+  -o-transition: all 0.3s ease-in-out;
+  transition: all 0.3s ease-in-out;
+}
+
+.hamburger:hover {
+  cursor: pointer;
+}
+
+#hamburger-circle {
+  -webkit-transition: all 0.3s ease-in-out;
+  -o-transition: all 0.3s ease-in-out;
+  transition: all 0.3s ease-in-out;
+  position: absolute;
+  left: 25px;
+  top: 18px;
+}
+
+#hamburger-circle.active {
+  -webkit-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  -o-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+
+#hamburger-circle:before {
+  content: "";
+  position: absolute;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  width: 60px;
+  height: 60px;
+  border: 5px solid transparent;
+  top: calc(50% - 30px);
+  left: calc(50% - 30px);
+  border-radius: 100%;
+  -webkit-transition: all 0.3s ease-in-out;
+  -o-transition: all 0.3s ease-in-out;
+  transition: all 0.3s ease-in-out;
+}
+
+#hamburger-circle.active:before {
+  border: 1px solid black;
+}
+
+#hamburger-circle.active .line {
+  width: 30px;
+}
+
+#hamburger-circle.active .line:nth-child(2) {
+  opacity: 0;
+}
+
+#hamburger-circle.active .line:nth-child(1) {
+  -webkit-transform: translateY(8px);
+  -ms-transform: translateY(8px);
+  -o-transform: translateY(8px);
+  transform: translateY(8px);
+}
+
+#hamburger-circle.active .line:nth-child(3) {
+  -webkit-transform: translateY(-8px) rotate(90deg);
+  -ms-transform: translateY(-8px) rotate(90deg);
+  -o-transform: translateY(-8px) rotate(90deg);
+  transform: translateY(-8px) rotate(90deg);
 }
 </style>
