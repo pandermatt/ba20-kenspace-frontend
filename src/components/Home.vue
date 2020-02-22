@@ -2,15 +2,13 @@
   <div>
     <div class="header-container">
       <div class="container">
-        <div class="">
-          <h1>
-            <b class="logo">KenSpace</b>
-            <span class="badge badge-secondary">Beta</span>
-          </h1>
-          <div v-if="apiKey">
-            <p><b>Hello!</b> Your Token: {{ apiKey }}</p>
-            <a v-on:click="logout" href="#">Logout</a>
-          </div>
+        <h1>
+          <b class="logo">KenSpace</b>
+          <span class="badge badge-secondary">Beta</span>
+        </h1>
+        <div v-if="apiKey">
+          <p><b>Hello!</b> Your Token: {{ apiKey }}</p>
+          <a v-on:click="logout" href="#">Logout</a>
         </div>
       </div>
     </div>
@@ -52,24 +50,23 @@
           </div>
         </div>
       </div>
-      <!--      <div class="row info-message">-->
-      <!--        <div class="col-md-4">-->
-      <!--          -->
-      <!--        </div>-->
-      <!--        <div class="col-md-8">-->
-      <!--          <div class="jumbotron" v-for="index in 10" :key="index">-->
-      <!--            <h1 class="display-4">Item 🥳</h1>-->
-      <!--          </div>-->
-      <!--        </div>-->
-      <!--      </div>-->
     </div>
-
     <svg class="wave" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
       <path
         fill="#0099ff"
-        fill-opacity="1"
-        d="M0,128L48,138.7C96,149,192,171,288,165.3C384,160,480,128,576,112C672,96,768,96,864,117.3C960,139,1056,181,1152,181.3C1248,181,1344,139,1392,117.3L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
-      ></path>
+        d="M0 77 C 473,283 822,-40 1920,116 V 359 H 0 V 67 Z"
+      >
+        <animate
+          attributeName="d"
+          attributeType="XML"
+          dur="20s"
+          repeatCount="indefinite"
+          values="M0 77 C 473,283 822,-40 1920,116 V 359 H 0 V 67 Z;
+          M0 77 C 973,260 1722,-53 1920,120 V 359 H 0 V 67 Z;
+          M0 77 C 473,-40 1222,283 1920,136 V 359 H 0 V 67 Z;
+          M0 77 C 473,283 822,-40 1920,116 V 359 H 0 V 67 Z;"
+        />
+      </path>
     </svg>
     <Footer></Footer>
   </div>
@@ -187,7 +184,7 @@ export default {
   transition: all 0.3s;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   #sidebar {
     margin-left: -300px;
     min-width: 300px;
@@ -220,18 +217,23 @@ export default {
 
 .header-container {
   padding-top: 20px;
-  padding-bottom: 140px;
+  padding-bottom: 160px;
   background-color: #f6f8fc;
 }
 
 .home-box {
   position: relative;
   top: -80px;
+  margin-bottom: -160px;
 }
 
 .wave {
   position: relative;
   top: 10px;
+}
+
+.container {
+  transition: all 0.3s ease-in-out;
 }
 
 .hamburger .line {
@@ -259,7 +261,7 @@ export default {
   transition: all 0.3s ease-in-out;
   position: absolute;
   left: 25px;
-  top: 18px;
+  top: -50px;
 }
 
 #hamburger-circle.active {
@@ -267,6 +269,9 @@ export default {
   -ms-transform: rotate(45deg);
   -o-transform: rotate(45deg);
   transform: rotate(45deg);
+  @media (min-width: 768px) {
+    opacity: 0;
+  }
 }
 
 #hamburger-circle:before {
