@@ -12,7 +12,7 @@
         </div>
       </div>
     </div>
-    <div class="container" v-if="!apiKey">
+    <div class="container login-page" v-if="!apiKey">
       <div class="jumbotron home-box">
         <h1 class="display-4">Sorry!</h1>
         <p class="lead">
@@ -51,23 +51,6 @@
         </div>
       </div>
     </div>
-    <svg class="wave" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
-      <path
-        fill="#0099ff"
-        d="M0 77 C 473,283 822,-40 1920,116 V 359 H 0 V 67 Z"
-      >
-        <animate
-          attributeName="d"
-          attributeType="XML"
-          dur="20s"
-          repeatCount="indefinite"
-          values="M0 77 C 473,283 822,-40 1920,116 V 359 H 0 V 67 Z;
-          M0 77 C 973,260 1722,-53 1920,120 V 359 H 0 V 67 Z;
-          M0 77 C 473,-40 1222,283 1920,136 V 359 H 0 V 67 Z;
-          M0 77 C 473,283 822,-40 1920,116 V 359 H 0 V 67 Z;"
-        />
-      </path>
-    </svg>
     <Footer></Footer>
   </div>
 </template>
@@ -106,32 +89,53 @@ export default {
         }
       });
 
-      if (password === "7C991E25649BD5F8F9D6A1AC9FFF3") {
-        this.apiKey = password;
-        Swal.fire({
-          icon: "success",
-          title: "Signed in successfully",
-          toast: true,
-          position: "top-end",
-          showConfirmButton: false,
-          timer: 3000,
-          timerProgressBar: true,
-          onOpen: toast => {
-            toast.addEventListener("mouseenter", Swal.stopTimer);
-            toast.addEventListener("mouseleave", Swal.resumeTimer);
+      const Error = Swal.mixin({
+        icon: "error",
+        showConfirmButton: false,
+        timer: 1500,
+        timerProgressBar: true,
+        footer: "Please contact an administrator",
+        hideClass: {
+          popup: "animated zoomOut faster"
+        }
+      });
+
+      if (password) {
+        const axios = require("axios");
+        const vueApp = this;
+        axios({
+          method: "GET",
+          url: `${process.env.VUE_APP_BACKEND_URL}/auth/`,
+          headers: {
+            Authorization: `Bearer ${password}`
           }
-        });
+        })
+          .then(function(response) {
+            if (response.data === "successful") {
+              vueApp.apiKey = password;
+              Swal.fire({
+                icon: "success",
+                title: "Signed in successfully",
+                toast: true,
+                position: "top-end",
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                onOpen: toast => {
+                  toast.addEventListener("mouseenter", Swal.stopTimer);
+                  toast.addEventListener("mouseleave", Swal.resumeTimer);
+                }
+              });
+            }
+          })
+          .catch(function() {
+            Error.fire({
+              title: "Your key is not valid"
+            });
+          });
       } else {
-        Swal.fire({
-          icon: "error",
-          title: "Your key is empty",
-          showConfirmButton: false,
-          timer: 1500,
-          timerProgressBar: true,
-          footer: "Please contact an administrator",
-          hideClass: {
-            popup: "animated zoomOut faster"
-          }
+        Error.fire({
+          title: "Your key is empty"
         });
       }
     },
@@ -224,12 +228,6 @@ export default {
 .home-box {
   position: relative;
   top: -80px;
-  margin-bottom: -160px;
-}
-
-.wave {
-  position: relative;
-  top: 10px;
 }
 
 .container {
@@ -315,5 +313,9 @@ export default {
   -ms-transform: translateY(-8px) rotate(90deg);
   -o-transform: translateY(-8px) rotate(90deg);
   transform: translateY(-8px) rotate(90deg);
+}
+
+.login-page {
+  min-height: 35vh;
 }
 </style>
