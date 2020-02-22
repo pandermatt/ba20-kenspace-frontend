@@ -45,6 +45,9 @@
 
         <!-- Page Content -->
         <div id="content" v-bind:class="{ active: showMobileMenu }">
+          <div v-if="queriesData.length === 0">
+            <Loading></Loading>
+          </div>
           <div
             class="card content-card"
             v-for="item in queriesData['results']"
@@ -63,10 +66,11 @@
 
 <script>
 import Footer from "./Footer";
+import Loading from "./Loading";
 
 export default {
   name: "Home",
-  components: { Footer },
+  components: { Loading, Footer },
   props: {
     msg: String
   },
