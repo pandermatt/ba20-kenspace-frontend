@@ -45,8 +45,14 @@
 
         <!-- Page Content -->
         <div id="content" v-bind:class="{ active: showMobileMenu }">
-          <div class="jumbotron" v-for="index in 10" :key="index">
-            <h1 class="display-4">Item 🥳</h1>
+          <div
+            class="card content-card"
+            v-for="item in queriesData['results']"
+            v-bind:key="item"
+          >
+            <div class="card-body">
+              <h5 class="card-title">{{ item }}</h5>
+            </div>
           </div>
         </div>
       </div>
@@ -67,7 +73,8 @@ export default {
   data: function() {
     return {
       apiKey: "",
-      showMobileMenu: false
+      showMobileMenu: false,
+      queriesData: []
     };
   },
   methods: {
@@ -126,6 +133,7 @@ export default {
                   toast.addEventListener("mouseleave", Swal.resumeTimer);
                 }
               });
+              vueApp.loadContent();
             }
           })
           .catch(function() {
@@ -156,6 +164,19 @@ export default {
           toast.addEventListener("mouseleave", Swal.resumeTimer);
         }
       });
+    },
+    loadContent: async function() {
+      const axios = require("axios");
+      const vueApp = this;
+      axios({
+        method: "GET",
+        url: `${process.env.VUE_APP_BACKEND_URL}/queries/`,
+        headers: {
+          Authorization: `Bearer ${localStorage.apiKey}`
+        }
+      }).then(function(response) {
+        vueApp.queriesData = response.data;
+      });
     }
   },
   watch: {
@@ -164,7 +185,10 @@ export default {
     }
   },
   mounted() {
-    if (localStorage.apiKey) this.apiKey = localStorage.apiKey;
+    if (localStorage.apiKey) {
+      this.apiKey = localStorage.apiKey;
+      this.loadContent();
+    }
   }
 };
 </script>
@@ -317,5 +341,17 @@ export default {
 
 .login-page {
   min-height: 35vh;
+}
+
+.content-card {
+  margin-bottom: 15px;
+  border: none;
+  transition: box-shadow 0.6s ease-in;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.content-card:hover {
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+  transition: box-shadow 0.2s ease-in;
 }
 </style>
