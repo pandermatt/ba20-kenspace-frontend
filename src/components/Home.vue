@@ -38,8 +38,18 @@
       <div class="wrapper">
         <!-- Sidebar -->
         <nav id="sidebar" v-bind:class="{ active: showMobileMenu }">
-          <div class="jumbotron">
-            <h1 class="display-4">Facette 🥳</h1>
+          <div class="sidebar-card">
+            <h3>Facet</h3>
+            <div v-if="facetData.length === 0">
+              <Loading></Loading>
+            </div>
+            <span
+              v-for="(facet, idx) in facetData['results']"
+              v-bind:key="idx"
+              class="badge badge-dark mr-1"
+              >{{ facet[0] }}
+              <span class="badge badge-light">{{ facet[1] }}</span>
+            </span>
           </div>
         </nav>
 
@@ -50,11 +60,19 @@
           </div>
           <div
             class="card content-card"
-            v-for="item in queriesData['results']"
-            v-bind:key="item"
+            v-for="(item, idx) in queriesData['results']"
+            v-bind:key="idx"
           >
             <div class="card-body">
-              <h5 class="card-title">{{ item }}</h5>
+              <h5 class="card-title">{{ item.text }}</h5>
+              <div>
+                <span
+                  v-for="(content, idx) in item.data"
+                  v-bind:key="idx"
+                  class="badge badge-pill badge-secondary mr-1"
+                  >{{ content }}
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -78,7 +96,9 @@ export default {
     return {
       apiKey: "",
       showMobileMenu: false,
-      queriesData: []
+      showLoadingMsg: false,
+      queriesData: [],
+      facetData: []
     };
   },
   methods: {
@@ -138,6 +158,7 @@ export default {
                 }
               });
               vueApp.loadContent();
+              vueApp.loadFacet();
             }
           })
           .catch(function() {
@@ -181,6 +202,19 @@ export default {
       }).then(function(response) {
         vueApp.queriesData = response.data;
       });
+    },
+    loadFacet: async function() {
+      const axios = require("axios");
+      const vueApp = this;
+      axios({
+        method: "GET",
+        url: `${process.env.VUE_APP_BACKEND_URL}/facet/`,
+        headers: {
+          Authorization: `Bearer ${localStorage.apiKey}`
+        }
+      }).then(function(response) {
+        vueApp.facetData = response.data;
+      });
     }
   },
   watch: {
@@ -190,8 +224,10 @@ export default {
   },
   mounted() {
     if (localStorage.apiKey) {
+      this.showLoadingMsg = false;
       this.apiKey = localStorage.apiKey;
       this.loadContent();
+      this.loadFacet();
     }
   }
 };
@@ -349,13 +385,18 @@ export default {
 
 .content-card {
   margin-bottom: 15px;
-  border: none;
   transition: box-shadow 0.6s ease-in;
   box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
 }
 
 .content-card:hover {
   box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175);
-  transition: box-shadow 0.2s ease-in;
+  transition: box-shadow 0.1s ease-in;
+}
+
+.sidebar-card {
+  background-color: #e9ecef;
+  border-radius: 0.3rem;
+  padding: 10px;
 }
 </style>
