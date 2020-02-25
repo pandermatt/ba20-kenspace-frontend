@@ -26,7 +26,7 @@
     </div>
     <div v-if="apiKey" class="home-box">
       <div
-        class="hamburger"
+        class="hamburger cursor-pointer"
         id="hamburger-circle"
         v-bind:class="{ active: showMobileMenu }"
         v-on:click="showMobileMenu = !showMobileMenu"
@@ -44,9 +44,10 @@
               <Loading></Loading>
             </div>
             <span
-              v-for="(facet, idx) in facetData['results']"
+              v-for="(facet, idx) in facetData"
               v-bind:key="idx"
-              class="badge badge-dark mr-1"
+              v-on:click="filterResults(facet)"
+              class="badge badge-dark mr-1 cursor-pointer"
               >{{ facet[0] }}
               <span class="badge badge-light">{{ facet[1] }}</span>
             </span>
@@ -60,7 +61,7 @@
           </div>
           <div
             class="card content-card"
-            v-for="(item, idx) in queriesData['results']"
+            v-for="(item, idx) in queriesData"
             v-bind:key="idx"
           >
             <div class="card-body">
@@ -69,7 +70,8 @@
                 <span
                   v-for="(content, idx) in item.data"
                   v-bind:key="idx"
-                  class="badge badge-pill badge-secondary mr-1"
+                  v-on:click="filterResults([content])"
+                  class="badge badge-pill badge-secondary mr-1 cursor-pointer"
                   >{{ content }}
                 </span>
               </div>
@@ -96,7 +98,8 @@ export default {
     return {
       apiKey: "",
       showMobileMenu: false,
-      showLoadingMsg: false,
+      originalQueriesData: [],
+      filterBy: [],
       queriesData: [],
       facetData: []
     };
@@ -200,7 +203,8 @@ export default {
           Authorization: `Bearer ${localStorage.apiKey}`
         }
       }).then(function(response) {
-        vueApp.queriesData = response.data;
+        vueApp.originalQueriesData = response.data["results"];
+        vueApp.queriesData = response.data["results"];
       });
     },
     loadFacet: async function() {
@@ -213,8 +217,16 @@ export default {
           Authorization: `Bearer ${localStorage.apiKey}`
         }
       }).then(function(response) {
-        vueApp.facetData = response.data;
+        vueApp.facetData = response.data["results"];
       });
+    },
+    filterResults: function(item) {
+      // TODO comming Soon
+      // this.filterBy.push(item);
+      this.queriesData = [...this.originalQueriesData];
+      this.queriesData = this.queriesData.filter(result =>
+        result["data"].includes(item[0])
+      );
     }
   },
   watch: {
@@ -224,7 +236,6 @@ export default {
   },
   mounted() {
     if (localStorage.apiKey) {
-      this.showLoadingMsg = false;
       this.apiKey = localStorage.apiKey;
       this.loadContent();
       this.loadFacet();
@@ -313,7 +324,7 @@ export default {
   transition: all 0.3s ease-in-out;
 }
 
-.hamburger:hover {
+.cursor-pointer:hover {
   cursor: pointer;
 }
 
