@@ -43,14 +43,16 @@
             <div v-if="facetData.length === 0">
               <Loading></Loading>
             </div>
-            <span
-              v-for="(facet, idx) in facetData"
-              v-bind:key="idx"
-              v-on:click="filterResults(facet)"
-              class="badge badge-dark mr-1 cursor-pointer"
-              >{{ facet[0] }}
-              <span class="badge badge-light">{{ facet[1] }}</span>
-            </span>
+            <transition-group name="list" tag="p">
+              <span
+                v-for="(value, key) in facetData"
+                v-bind:key="key"
+                v-on:click="filterResults(key)"
+                class="badge badge-dark mr-1 cursor-pointer"
+                >{{ key }}
+                <span class="badge badge-light">{{ value }}</span>
+              </span>
+            </transition-group>
           </div>
         </nav>
 
@@ -70,7 +72,7 @@
                 <span
                   v-for="(content, idx) in item.data"
                   v-bind:key="idx"
-                  v-on:click="filterResults([content])"
+                  v-on:click="filterResults(content)"
                   class="badge badge-pill badge-secondary mr-1 cursor-pointer"
                   >{{ content }}
                 </span>
@@ -161,7 +163,6 @@ export default {
                 }
               });
               vueApp.loadContent();
-              vueApp.loadFacet();
             }
           })
           .catch(function() {
@@ -196,37 +197,65 @@ export default {
     loadContent: async function() {
       const axios = require("axios");
       const vueApp = this;
+      let params = {};
+      if (localStorage.modelUuid) {
+        params = { uuid: localStorage.modelUuid };
+      }
       axios({
         method: "GET",
         url: `${process.env.VUE_APP_BACKEND_URL}/queries/`,
+        params: params,
         headers: {
           Authorization: `Bearer ${localStorage.apiKey}`
         }
       }).then(function(response) {
         vueApp.originalQueriesData = response.data["results"];
         vueApp.queriesData = response.data["results"];
+        localStorage.modelUuid = response.data["uuid"];
+
+        vueApp.generate_facet(response.data["results"]);
       });
     },
-    loadFacet: async function() {
-      const axios = require("axios");
-      const vueApp = this;
-      axios({
-        method: "GET",
-        url: `${process.env.VUE_APP_BACKEND_URL}/facet/`,
-        headers: {
-          Authorization: `Bearer ${localStorage.apiKey}`
+    generate_facet: function(obj) {
+      let facet = {};
+
+      for (let i = 0; i < obj.length; i++) {
+        let cluster_data = obj[i].data;
+        for (let j = 0; j < cluster_data.length; j++) {
+          if (cluster_data[j] in facet) {
+            facet[cluster_data[j]] = facet[cluster_data[j]] + 1;
+          } else {
+            facet[cluster_data[j]] = 1;
+          }
         }
-      }).then(function(response) {
-        vueApp.facetData = response.data["results"];
+      }
+
+      this.facetData = facet;
+    },
+    sort_object: function(obj) {
+      let items = Object.keys(obj).map(function(key) {
+        return [key, obj[key]];
       });
+      items.sort(function(first, second) {
+        return second[1] - first[1];
+      });
+      let sorted_obj = {};
+      const jquery = require("jquery");
+      jquery.each(items, function(k, v) {
+        let use_key = v[0];
+        let use_value = v[1];
+        sorted_obj[use_key] = use_value;
+      });
+      return sorted_obj;
     },
     filterResults: function(item) {
       // TODO comming Soon
       // this.filterBy.push(item);
       this.queriesData = [...this.originalQueriesData];
       this.queriesData = this.queriesData.filter(result =>
-        result["data"].includes(item[0])
+        result["data"].includes(item)
       );
+      this.generate_facet(this.queriesData);
     }
   },
   watch: {
@@ -238,7 +267,6 @@ export default {
     if (localStorage.apiKey) {
       this.apiKey = localStorage.apiKey;
       this.loadContent();
-      this.loadFacet();
     }
   }
 };
@@ -260,7 +288,7 @@ export default {
   min-width: 30vw;
   max-width: 30vw;
   margin-left: 50px;
-  transition: all 0.3s;
+  transition: all 1s;
 }
 
 @media (max-width: 767px) {
@@ -409,5 +437,15 @@ export default {
   background-color: #e9ecef;
   border-radius: 0.3rem;
   padding: 10px;
+}
+
+.list-enter-active,
+.list-leave-active {
+  transition: all 1s;
+}
+
+.list-enter,
+.list-leave-to {
+  opacity: 0;
 }
 </style>
