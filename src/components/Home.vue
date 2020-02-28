@@ -86,7 +86,7 @@
               class="facet-badge"
             >
               <span
-                class="badge mr-1 cursor-pointer"
+                class="badge cursor-pointer"
                 v-on:click="toggleFilter(key)"
                 v-bind:class="[
                   filterByList.includes(key) ? 'badge-info' : 'badge-dark'
@@ -296,16 +296,19 @@ export default {
       this.loadContent();
     },
     clearFiltered: function() {
+      this.no_results = false;
       this.filterByList = [];
       this.queriesData = [...this.originalQueriesData];
       this.generate_facet(this.queriesData);
     },
     clearDeleted: function() {
+      this.no_results = false;
       this.deletedList = [];
       this.loadContent();
     },
     loadContent: async function() {
       const axios = require("axios");
+      const Swal = require("sweetalert2");
       const vueApp = this;
       let params = {};
       if (localStorage.modelUuid) {
@@ -327,6 +330,7 @@ export default {
         localStorage.modelUuid = response.data["uuid"];
 
         vueApp.removeFilter("");
+        Swal.close();
       });
     },
     generate_facet: function(obj) {
@@ -400,38 +404,28 @@ export default {
       this.removeFilter(item);
       const Swal = require("sweetalert2");
       Swal.fire({
-        icon: "success",
         title: "Generating new Cluster",
-        position: "top-end",
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true,
-        onOpen: toast => {
-          toast.addEventListener("mouseenter", Swal.stopTimer);
-          toast.addEventListener("mouseleave", Swal.resumeTimer);
-        }
+        onBeforeOpen: () => {
+          Swal.showLoading();
+          this.queriesData = [];
+          this.loadContent();
+        },
+        showConfirmButton: false
       });
-      this.queriesData = [];
-      this.loadContent();
     },
     removeDeleted: function(item) {
       this.deletedList = this.deletedList.filter(e => e !== item);
 
       const Swal = require("sweetalert2");
       Swal.fire({
-        icon: "success",
         title: "Generating new Cluster",
-        position: "top-end",
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true,
-        onOpen: toast => {
-          toast.addEventListener("mouseenter", Swal.stopTimer);
-          toast.addEventListener("mouseleave", Swal.resumeTimer);
-        }
+        onBeforeOpen: () => {
+          Swal.showLoading();
+          this.queriesData = [];
+          this.loadContent();
+        },
+        showConfirmButton: false
       });
-      this.queriesData = [];
-      this.loadContent();
     }
   },
   watch: {
@@ -647,8 +641,22 @@ export default {
   color: black;
 }
 
+@keyframes delayBubble {
+  0% {
+    height: 0;
+  }
+  70% {
+    height: 0;
+  }
+  100% {
+    height: 90px;
+  }
+}
+
 .facet-badge {
   display: inline;
+
+  margin-right: 4px;
 
   &:hover {
     .badge {
@@ -657,7 +665,10 @@ export default {
     }
 
     .action-box {
-      display: inline-block;
+      transition: all 1s;
+      animation: delayBubble 1s forwards;
+      height: 90px;
+      width: 30px;
     }
   }
 
@@ -665,12 +676,21 @@ export default {
     background: #fbfbfb;
     border-radius: 10px;
     position: absolute;
-    display: none;
+    height: 0;
+    width: 40px;
+    display: inline-block;
+    overflow: hidden;
+    transition: all 0.01s;
     z-index: 1;
+
+    hr {
+      margin: 10px 0;
+    }
 
     div {
       padding-right: 8px;
       padding-left: 8px;
+      width: 100px;
 
       &:hover {
         color: red;
@@ -689,7 +709,9 @@ export default {
     }
 
     &:hover {
-      display: inline-block;
+      transition: all 0.2s;
+      height: 90px;
+      width: 100px;
     }
   }
 }
