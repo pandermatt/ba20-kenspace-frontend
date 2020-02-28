@@ -8,7 +8,44 @@
         </h1>
         <div v-if="apiKey">
           <p><b>Hello!</b> Your Token: {{ apiKey }}</p>
-          <a v-on:click="logout" href="#">Logout</a>
+          <a v-on:click="logout" href="#">logout</a> |
+          <a v-on:click="clearFiltered" href="#">clear picked</a> |
+          <a v-on:click="clearDeleted" href="#">clear deleted</a> |
+          <a v-on:click="resetApp" href="#">reset & generate new model</a>
+          <div class="display-filter">
+            <b>picked</b> <span v-if="filterByList.length === 0">none</span>
+            <transition-group name="list">
+              <span
+                v-for="(value, idx) in filterByList"
+                v-bind:key="idx + 0"
+                v-on:click="removeFilter(value)"
+                class="badge badge-dark mr-1 cursor-pointer"
+                style="padding-right: 20px;"
+                >{{ value }}
+                <i
+                  class="ri-close-circle-line"
+                  style="position: absolute;padding-left: 5px;"
+                ></i>
+              </span>
+            </transition-group>
+          </div>
+          <div class="display-deleted">
+            <b>deleted</b> <span v-if="deletedList.length === 0">none</span>
+            <transition-group name="list">
+              <span
+                v-for="(value, idx) in deletedList"
+                v-bind:key="idx + 0"
+                class="badge badge-dark mr-1 cursor-pointer"
+                style="padding-right: 20px;"
+                v-on:click="removeDeleted(value)"
+                >{{ value }}
+                <i
+                  class="ri-close-circle-line"
+                  style="position: absolute;padding-left: 5px;"
+                ></i>
+              </span>
+            </transition-group>
+          </div>
         </div>
       </div>
     </div>
@@ -38,32 +75,64 @@
       <div class="wrapper">
         <!-- Sidebar -->
         <nav id="sidebar" v-bind:class="{ active: showMobileMenu }">
+          <h3>Facet</h3>
           <div class="sidebar-card">
-            <h3>Facet</h3>
             <div v-if="facetData.length === 0">
               <Loading></Loading>
             </div>
-            <transition-group name="list" tag="p">
+            <div
+              v-for="(value, key) in facetData"
+              v-bind:key="key"
+              class="facet-badge"
+            >
               <span
-                v-for="(value, key) in facetData"
-                v-bind:key="key"
-                v-on:click="filterResults(key)"
-                class="badge badge-dark mr-1 cursor-pointer"
+                class="badge mr-1 cursor-pointer"
+                v-on:click="toggleFilter(key)"
+                v-bind:class="[
+                  filterByList.includes(key) ? 'badge-info' : 'badge-dark'
+                ]"
                 >{{ key }}
                 <span class="badge badge-light">{{ value }}</span>
               </span>
-            </transition-group>
+              <div class="action-box">
+                <div
+                  v-on:click="addFilter(key)"
+                  v-if="!filterByList.includes(key)"
+                >
+                  <i class="ri-heart-line"></i> Pick
+                </div>
+                <div
+                  v-on:click="removeFilter(key)"
+                  v-if="filterByList.includes(key)"
+                >
+                  <i class="ri-heart-2-line"></i> Unpick
+                </div>
+                <hr />
+                <div v-on:click="addDeleted(key)">
+                  <i class="ri-delete-bin-2-line"></i> Remove
+                </div>
+              </div>
+            </div>
           </div>
         </nav>
 
         <!-- Page Content -->
         <div id="content" v-bind:class="{ active: showMobileMenu }">
-          <div v-if="queriesData.length === 0">
+          <h3>Result: {{ queriesData.length }}</h3>
+          <div v-if="queriesData.length === 0 && !no_results">
             <Loading></Loading>
+            <div class="alert alert-info" role="alert">
+              Generating, please wait.
+            </div>
+          </div>
+          <div v-if="no_results">
+            <div class="alert alert-warning" role="alert">
+              Your selection has no result.
+            </div>
           </div>
           <div
             class="card content-card"
-            v-for="(item, idx) in queriesData"
+            v-for="(item, idx) in queriesData.slice(0, limit)"
             v-bind:key="idx"
           >
             <div class="card-body">
@@ -72,13 +141,21 @@
                 <span
                   v-for="(content, idx) in item.data"
                   v-bind:key="idx"
-                  v-on:click="filterResults(content)"
+                  v-on:click="addFilter(content, false)"
                   class="badge badge-pill badge-secondary mr-1 cursor-pointer"
                   >{{ content }}
                 </span>
               </div>
             </div>
           </div>
+          <button
+            type="button"
+            class="btn btn-light w-100"
+            v-on:click="limit = limit + 5"
+            v-if="limit < queriesData.length"
+          >
+            Show More
+          </button>
         </div>
       </div>
     </div>
@@ -101,9 +178,12 @@ export default {
       apiKey: "",
       showMobileMenu: false,
       originalQueriesData: [],
-      filterBy: [],
+      filterByList: [],
+      deletedList: [],
       queriesData: [],
-      facetData: []
+      facetData: [],
+      limit: 5,
+      no_results: false
     };
   },
   methods: {
@@ -178,7 +258,6 @@ export default {
     },
     logout: function() {
       this.apiKey = "";
-      // todo maybe global :D
       const Swal = require("sweetalert2");
       Swal.fire({
         icon: "success",
@@ -194,12 +273,46 @@ export default {
         }
       });
     },
+    resetApp: function() {
+      localStorage.modelUuid = "";
+      this.filterByList = [];
+      this.deletedList = [];
+      this.facetData = [];
+      this.queriesData = [];
+      this.no_results = false;
+      const Swal = require("sweetalert2");
+      Swal.fire({
+        icon: "success",
+        title: "Generating new Cluster",
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true,
+        onOpen: toast => {
+          toast.addEventListener("mouseenter", Swal.stopTimer);
+          toast.addEventListener("mouseleave", Swal.resumeTimer);
+        }
+      });
+      this.loadContent();
+    },
+    clearFiltered: function() {
+      this.filterByList = [];
+      this.queriesData = [...this.originalQueriesData];
+      this.generate_facet(this.queriesData);
+    },
+    clearDeleted: function() {
+      this.deletedList = [];
+      this.loadContent();
+    },
     loadContent: async function() {
       const axios = require("axios");
       const vueApp = this;
       let params = {};
       if (localStorage.modelUuid) {
         params = { uuid: localStorage.modelUuid };
+      }
+      if (this.deletedList.length !== 0) {
+        params = { ...params, deletedWords: JSON.stringify(this.deletedList) };
       }
       axios({
         method: "GET",
@@ -213,7 +326,7 @@ export default {
         vueApp.queriesData = response.data["results"];
         localStorage.modelUuid = response.data["uuid"];
 
-        vueApp.generate_facet(response.data["results"]);
+        vueApp.removeFilter("");
       });
     },
     generate_facet: function(obj) {
@@ -230,7 +343,7 @@ export default {
         }
       }
 
-      this.facetData = facet;
+      this.facetData = this.sort_object(facet);
     },
     sort_object: function(obj) {
       let items = Object.keys(obj).map(function(key) {
@@ -242,28 +355,103 @@ export default {
       let sorted_obj = {};
       const jquery = require("jquery");
       jquery.each(items, function(k, v) {
-        let use_key = v[0];
-        let use_value = v[1];
-        sorted_obj[use_key] = use_value;
+        sorted_obj[v[0]] = v[1];
       });
       return sorted_obj;
     },
-    filterResults: function(item) {
-      // TODO comming Soon
-      // this.filterBy.push(item);
+    removeFilter: function(item) {
+      this.no_results = false;
+      this.filterByList = this.filterByList.filter(e => e !== item);
       this.queriesData = [...this.originalQueriesData];
+      for (let i = 0; i < this.filterByList.length; i++) {
+        this.queriesData = this.queriesData.filter(result =>
+          result["data"].includes(this.filterByList[i])
+        );
+      }
+      if (this.queriesData.length === 0) {
+        this.no_results = true;
+      }
+      this.generate_facet(this.queriesData);
+    },
+    toggleFilter: function(item) {
+      if (this.filterByList.includes(item)) {
+        this.removeFilter(item);
+        return;
+      }
+      this.addFilter(item);
+    },
+    addFilter: function(item) {
+      if (this.filterByList.includes(item)) {
+        return;
+      }
+      this.limit = 5;
+      this.filterByList.push(item);
       this.queriesData = this.queriesData.filter(result =>
         result["data"].includes(item)
       );
       this.generate_facet(this.queriesData);
+    },
+    addDeleted: function(item) {
+      if (this.deletedList.includes(item)) {
+        return;
+      }
+
+      this.deletedList.push(item);
+      this.removeFilter(item);
+      const Swal = require("sweetalert2");
+      Swal.fire({
+        icon: "success",
+        title: "Generating new Cluster",
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        onOpen: toast => {
+          toast.addEventListener("mouseenter", Swal.stopTimer);
+          toast.addEventListener("mouseleave", Swal.resumeTimer);
+        }
+      });
+      this.queriesData = [];
+      this.loadContent();
+    },
+    removeDeleted: function(item) {
+      this.deletedList = this.deletedList.filter(e => e !== item);
+
+      const Swal = require("sweetalert2");
+      Swal.fire({
+        icon: "success",
+        title: "Generating new Cluster",
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        onOpen: toast => {
+          toast.addEventListener("mouseenter", Swal.stopTimer);
+          toast.addEventListener("mouseleave", Swal.resumeTimer);
+        }
+      });
+      this.queriesData = [];
+      this.loadContent();
     }
   },
   watch: {
     apiKey(newApiKey) {
       localStorage.apiKey = newApiKey;
+    },
+    filterByList(newList) {
+      localStorage.filterByList = JSON.stringify(newList);
+    },
+    deletedList(newList) {
+      localStorage.deletedList = JSON.stringify(newList);
     }
   },
   mounted() {
+    if (localStorage.filterByList) {
+      this.filterByList = JSON.parse(localStorage.filterByList);
+    }
+    if (localStorage.deletedList) {
+      this.deletedList = JSON.parse(localStorage.deletedList);
+    }
     if (localStorage.apiKey) {
       this.apiKey = localStorage.apiKey;
       this.loadContent();
@@ -447,5 +635,62 @@ export default {
 .list-enter,
 .list-leave-to {
   opacity: 0;
+}
+
+.display-filter {
+  padding-top: 10px;
+  height: 50px;
+}
+
+.badge:hover {
+  background-color: white;
+  color: black;
+}
+
+.facet-badge {
+  display: inline;
+
+  &:hover {
+    .badge {
+      background-color: white;
+      color: black;
+    }
+
+    .action-box {
+      display: inline-block;
+    }
+  }
+
+  .action-box {
+    background: #fbfbfb;
+    border-radius: 10px;
+    position: absolute;
+    display: none;
+    z-index: 1;
+
+    div {
+      padding-right: 8px;
+      padding-left: 8px;
+
+      &:hover {
+        color: red;
+        cursor: pointer;
+      }
+    }
+
+    div:first-child {
+      padding-top: 8px;
+      padding-bottom: 0;
+    }
+
+    div:last-child {
+      padding-top: 0;
+      padding-bottom: 8px;
+    }
+
+    &:hover {
+      display: inline-block;
+    }
+  }
 }
 </style>
