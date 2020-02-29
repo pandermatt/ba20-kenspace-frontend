@@ -72,7 +72,6 @@
         <span class="line"></span>
       </div>
       <div class="wrapper">
-        <!-- Sidebar -->
         <nav id="sidebar" v-bind:class="{ active: showMobileMenu }">
           <h3>Facet</h3>
           <div class="sidebar-card">
@@ -120,8 +119,6 @@
             </div>
           </div>
         </nav>
-
-        <!-- Page Content -->
         <div id="content" v-bind:class="{ active: showMobileMenu }">
           <h3>Result: {{ queriesData.length }}</h3>
           <div v-if="queriesData.length === 0 && !no_results">
@@ -249,6 +246,7 @@ export default {
                   toast.addEventListener("mouseleave", Swal.resumeTimer);
                 }
               });
+              localStorage.apiKey = password;
               vueApp.loadContent();
             }
           })
@@ -470,7 +468,6 @@ export default {
 };
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
 .wrapper {
   display: flex;
