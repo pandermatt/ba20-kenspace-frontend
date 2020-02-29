@@ -7,8 +7,7 @@
           <span class="badge badge-secondary">Beta</span>
         </h1>
         <div v-if="apiKey">
-          <p><b>Hello!</b> Your Token: {{ apiKey }}</p>
-          <a v-on:click="logout" href="#">logout</a> |
+          <p><b>Hello!</b> <a v-on:click="logout" href="#">logout</a></p>
           <a v-on:click="clearFiltered" href="#">clear picked</a> |
           <a v-on:click="clearDeleted" href="#">clear deleted</a> |
           <a v-on:click="resetApp" href="#">reset & generate new model</a>
@@ -126,10 +125,10 @@
         <div id="content" v-bind:class="{ active: showMobileMenu }">
           <h3>Result: {{ queriesData.length }}</h3>
           <div v-if="queriesData.length === 0 && !no_results">
-            <Loading></Loading>
             <div class="alert alert-info" role="alert">
               Generating, please wait.
             </div>
+            <Loading></Loading>
           </div>
           <div v-if="no_results">
             <div class="alert alert-warning" role="alert">
@@ -165,7 +164,7 @@
         </div>
       </div>
     </div>
-    <Footer></Footer>
+    <Footer :api-key="apiKey" :model-uuid="modelUuid"></Footer>
   </div>
 </template>
 
@@ -190,7 +189,8 @@ export default {
       facetData: [],
       limit: 5,
       no_results: false,
-      tags_same_as_result: false
+      tags_same_as_result: false,
+      modelUuid: ""
     };
   },
   methods: {
@@ -324,6 +324,7 @@ export default {
       if (this.deletedList.length !== 0) {
         params = { ...params, deletedWords: JSON.stringify(this.deletedList) };
       }
+
       axios({
         method: "GET",
         url: `${process.env.VUE_APP_BACKEND_URL}/queries/`,
@@ -334,6 +335,7 @@ export default {
       }).then(function(response) {
         vueApp.originalQueriesData = response.data["results"];
         vueApp.queriesData = response.data["results"];
+        vueApp.modelUuid = response.data["uuid"];
         localStorage.modelUuid = response.data["uuid"];
 
         vueApp.removeFilter("");
@@ -456,6 +458,9 @@ export default {
     }
     if (localStorage.deletedList) {
       this.deletedList = JSON.parse(localStorage.deletedList);
+    }
+    if (localStorage.modelUuid) {
+      this.modelUuid = localStorage.modelUuid;
     }
     if (localStorage.apiKey) {
       this.apiKey = localStorage.apiKey;

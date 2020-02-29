@@ -23,6 +23,10 @@
           <div class="row">
             <div class="col-sm">
               <h1>KenSpace</h1>
+              <div v-if="apiKey">
+                <p><b>Your Token:</b> {{ apiKey }}</p>
+                <p><b>Model UUID:</b> {{ modelUuid }}</p>
+              </div>
             </div>
             <div class="col-sm">
               <p class="author">
@@ -39,7 +43,11 @@
 
 <script>
 export default {
-  name: "Footer"
+  name: "Footer",
+  props: {
+    apiKey: String,
+    modelUuid: String
+  }
 };
 </script>
 
