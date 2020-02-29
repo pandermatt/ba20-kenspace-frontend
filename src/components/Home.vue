@@ -92,7 +92,13 @@
                   filterByList.includes(key) ? 'badge-info' : 'badge-dark'
                 ]"
                 >{{ key }}
-                <span class="badge badge-light">{{ value }}</span>
+                <span
+                  class="badge"
+                  v-bind:class="[
+                    tags_same_as_result ? 'badge-danger' : 'badge-light'
+                  ]"
+                  >{{ value }}</span
+                >
               </span>
               <div class="action-box">
                 <div
@@ -183,7 +189,8 @@ export default {
       queriesData: [],
       facetData: [],
       limit: 5,
-      no_results: false
+      no_results: false,
+      tags_same_as_result: false
     };
   },
   methods: {
@@ -346,6 +353,10 @@ export default {
           }
         }
       }
+
+      let keys = Object.keys(facet);
+      let results = this.queriesData.length;
+      this.tags_same_as_result = keys.every(val => facet[val] === results);
 
       this.facetData = this.sort_object(facet);
     },
