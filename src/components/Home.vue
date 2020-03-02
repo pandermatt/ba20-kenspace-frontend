@@ -73,7 +73,18 @@
       </div>
       <div class="wrapper">
         <nav id="sidebar" v-bind:class="{ active: showMobileMenu }">
-          <h3>Facet</h3>
+          <h3>
+            Facet
+            <button type="button" class="btn btn-light" v-on:click="changeSort">
+              Sort
+              <i
+                class="fas"
+                v-bind:class="[
+                  sortABC ? 'fa-sort-numeric-down' : 'fa-sort-alpha-down'
+                ]"
+              ></i>
+            </button>
+          </h3>
           <div class="sidebar-card">
             <div v-if="facetData.length === 0">
               <Loading></Loading>
@@ -139,6 +150,7 @@
           >
             <div class="card-body">
               <h5 class="card-title">{{ item.text }}</h5>
+              <p class="small">{{ item.content }}</p>
               <div>
                 <span
                   v-for="(content, idx) in item.data"
@@ -187,7 +199,8 @@ export default {
       limit: 5,
       no_results: false,
       tags_same_as_result: false,
-      modelUuid: ""
+      modelUuid: "",
+      sortABC: false
     };
   },
   methods: {
@@ -360,13 +373,29 @@ export default {
 
       this.facetData = this.sort_object(facet);
     },
+    changeSort: function() {
+      this.sortABC = !this.sortABC;
+      this.facetData = this.sort_object(this.facetData);
+    },
     sort_object: function(obj) {
       let items = Object.keys(obj).map(function(key) {
         return [key, obj[key]];
       });
-      items.sort(function(first, second) {
-        return second[1] - first[1];
-      });
+      if (this.sortABC) {
+        items.sort(function(first, second) {
+          if (first[0] < second[0]) {
+            return -1;
+          }
+          if (first[0] > second[0]) {
+            return 1;
+          }
+          return 0;
+        });
+      } else {
+        items.sort(function(first, second) {
+          return second[1] - first[1];
+        });
+      }
       let sorted_obj = {};
       const jquery = require("jquery");
       jquery.each(items, function(k, v) {
