@@ -11,39 +11,52 @@
           <a v-on:click="clearFiltered" href="#">clear picked</a> |
           <a v-on:click="clearDeleted" href="#">clear deleted</a> |
           <a v-on:click="resetApp" href="#">reset & generate new model</a>
-          <div class="display-filter">
-            <b>picked</b> <span v-if="filterByList.length === 0">none</span>
-            <transition-group name="list">
-              <span
-                v-for="(value, idx) in filterByList"
-                v-bind:key="idx + 0"
-                v-on:click="removeFilter(value)"
-                class="badge badge-dark mr-1 cursor-pointer"
-                style="padding-right: 20px;"
-                >{{ value }}
-                <i
-                  class="ri-close-circle-line"
-                  style="position: absolute;padding-left: 5px;"
-                ></i>
-              </span>
-            </transition-group>
-          </div>
-          <div class="display-deleted">
-            <b>deleted</b> <span v-if="deletedList.length === 0">none</span>
-            <transition-group name="list">
-              <span
-                v-for="(value, idx) in deletedList"
-                v-bind:key="idx + 0"
-                class="badge badge-dark mr-1 cursor-pointer"
-                style="padding-right: 20px;"
-                v-on:click="removeDeleted(value)"
-                >{{ value }}
-                <i
-                  class="ri-close-circle-line"
-                  style="position: absolute;padding-left: 5px;"
-                ></i>
-              </span>
-            </transition-group>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="display-filter">
+                <b>picked</b> <span v-if="filterByList.length === 0">none</span>
+                <transition-group name="list">
+                  <span
+                    v-for="(value, idx) in filterByList"
+                    v-bind:key="idx + 0"
+                    v-on:click="removeFilter(value)"
+                    class="badge badge-dark mr-1 cursor-pointer"
+                    style="padding-right: 20px;"
+                    >{{ value }}
+                    <i
+                      class="ri-close-circle-line"
+                      style="position: absolute;padding-left: 5px;"
+                    ></i>
+                  </span>
+                </transition-group>
+              </div>
+              <div>
+                <b>deleted</b> <span v-if="deletedList.length === 0">none</span>
+                <transition-group name="list">
+                  <span
+                    v-for="(value, idx) in deletedList"
+                    v-bind:key="idx + 0"
+                    class="badge badge-dark mr-1 cursor-pointer"
+                    style="padding-right: 20px;"
+                    v-on:click="removeDeleted(value)"
+                    >{{ value }}
+                    <i
+                      class="ri-close-circle-line"
+                      style="position: absolute;padding-left: 5px;"
+                    ></i>
+                  </span>
+                </transition-group>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mt-4">
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Search..."
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -131,7 +144,9 @@
           </div>
         </nav>
         <div id="content" v-bind:class="{ active: showMobileMenu }">
-          <h3>Result: {{ queriesData.length }}</h3>
+          <h3>
+            Result: <span class="small">{{ queriesData.length }}</span>
+          </h3>
           <div v-if="queriesData.length === 0 && !no_results">
             <div class="alert alert-info" role="alert">
               Generating, please wait.
@@ -148,8 +163,15 @@
             v-for="(item, idx) in queriesData.slice(0, limit)"
             v-bind:key="idx"
           >
+            <div
+              class="show-similar"
+              v-bind:class="{ active: similar_active }"
+              v-on:click="sortSimilarObjects(item.cluster_id)"
+            >
+              <i class="fas fa-greater-than-equal"></i> show similar records
+            </div>
             <div class="card-body">
-              <h5 class="card-title">{{ item.text }}</h5>
+              <h5 class="card-title card-title-similar">{{ item.text }}</h5>
               <p class="small">{{ item.content }}</p>
               <div>
                 <span
@@ -200,7 +222,8 @@ export default {
       no_results: false,
       tags_same_as_result: false,
       modelUuid: "",
-      sortABC: false
+      sortABC: false,
+      similar_active: false
     };
   },
   methods: {
@@ -320,6 +343,7 @@ export default {
       this.generate_facet(this.queriesData);
     },
     clearDeleted: function() {
+      this.similar_active = false;
       this.no_results = false;
       this.deletedList = [];
       this.loadContent();
@@ -354,6 +378,12 @@ export default {
       });
     },
     generate_facet: function(obj) {
+      if (this.similar_active) {
+        // Collact cluster with same Cluster ID and generate new facets
+        let cluster_id = obj[0]["cluster_id"];
+        obj = obj.filter(result => result["cluster_id"] == cluster_id);
+      }
+
       let facet = {};
 
       for (let i = 0; i < obj.length; i++) {
@@ -417,6 +447,17 @@ export default {
       }
       this.generate_facet(this.queriesData);
     },
+    sortSimilarObjects: function(sortItem) {
+      if (this.similar_active) {
+        this.queriesData = [...this.originalQueriesData];
+      } else {
+        this.queriesData = this.queriesData.filter(
+          result => result["cluster_id"] == sortItem
+        );
+      }
+      this.similar_active = !this.similar_active;
+      this.generate_facet(this.queriesData);
+    },
     toggleFilter: function(item) {
       if (this.filterByList.includes(item)) {
         this.removeFilter(item);
@@ -440,6 +481,7 @@ export default {
         return;
       }
 
+      this.similar_active = false;
       this.deletedList.push(item);
       this.removeFilter(item);
       const Swal = require("sweetalert2");
@@ -455,6 +497,8 @@ export default {
     },
     removeDeleted: function(item) {
       this.deletedList = this.deletedList.filter(e => e !== item);
+
+      this.similar_active = false;
 
       const Swal = require("sweetalert2");
       Swal.fire({
@@ -663,6 +707,10 @@ export default {
   padding: 10px;
 }
 
+.card-title-similar {
+  padding-top: 30px;
+}
+
 .list-enter-active,
 .list-leave-active {
   transition: all 1s;
@@ -675,7 +723,7 @@ export default {
 
 .display-filter {
   padding-top: 10px;
-  height: 50px;
+  min-height: 50px;
 }
 
 .badge:hover {
@@ -756,5 +804,22 @@ export default {
       width: 100px;
     }
   }
+}
+
+.show-similar {
+  cursor: pointer;
+  position: absolute;
+  right: 0;
+  background-color: #0099ff;
+  color: white;
+
+  &.active {
+    background-color: #28a745;
+  }
+
+  text-align: center;
+  width: 200px;
+  padding: 5px 10px;
+  border-radius: 0 3px 0 3px;
 }
 </style>
