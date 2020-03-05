@@ -223,7 +223,8 @@ export default {
       tags_same_as_result: false,
       modelUuid: "",
       sortABC: false,
-      similar_active: false
+      similar_active: false,
+      current_cluster_id: null
     };
   },
   methods: {
@@ -340,13 +341,29 @@ export default {
       this.no_results = false;
       this.filterByList = [];
       this.queriesData = [...this.originalQueriesData];
+      this.groupCluster();
       this.generate_facet(this.queriesData);
     },
     clearDeleted: function() {
-      this.similar_active = false;
       this.no_results = false;
       this.deletedList = [];
-      this.loadContent();
+      this.similar_active = false;
+      const Swal = require("sweetalert2");
+      Swal.fire({
+        title: "Generating new Cluster",
+        onBeforeOpen: () => {
+          Swal.showLoading();
+          this.loadContent();
+        },
+        showConfirmButton: false
+      });
+    },
+    groupCluster: function() {
+      if (this.similar_active) {
+        this.queriesData = this.queriesData.filter(
+          result => result["cluster_id"] == this.current_cluster_id
+        );
+      }
     },
     loadContent: async function() {
       const axios = require("axios");
@@ -378,12 +395,6 @@ export default {
       });
     },
     generate_facet: function(obj) {
-      if (this.similar_active) {
-        // Collact cluster with same Cluster ID and generate new facets
-        let cluster_id = obj[0]["cluster_id"];
-        obj = obj.filter(result => result["cluster_id"] == cluster_id);
-      }
-
       let facet = {};
 
       for (let i = 0; i < obj.length; i++) {
@@ -442,21 +453,20 @@ export default {
           result["data"].includes(this.filterByList[i])
         );
       }
+      this.groupCluster();
+
       if (this.queriesData.length === 0) {
         this.no_results = true;
       }
       this.generate_facet(this.queriesData);
     },
     sortSimilarObjects: function(sortItem) {
-      if (this.similar_active) {
-        this.queriesData = [...this.originalQueriesData];
-      } else {
-        this.queriesData = this.queriesData.filter(
-          result => result["cluster_id"] == sortItem
-        );
-      }
       this.similar_active = !this.similar_active;
-      this.generate_facet(this.queriesData);
+      this.current_cluster_id = null;
+      if (this.similar_active) {
+        this.current_cluster_id = sortItem;
+      }
+      this.removeFilter("");
     },
     toggleFilter: function(item) {
       if (this.filterByList.includes(item)) {
