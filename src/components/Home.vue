@@ -168,7 +168,12 @@
               v-bind:class="{ active: similar_active }"
               v-on:click="sortSimilarObjects(item.cluster_id)"
             >
-              <i class="fas fa-greater-than-equal"></i> show similar records
+              <div v-if="!similar_active">
+                <i class="fas fa-greater-than-equal"></i> show similar records
+              </div>
+              <div v-if="similar_active">
+                <i class="fas fa-less-than-equal"></i> show all records
+              </div>
             </div>
             <div class="card-body">
               <h5 class="card-title card-title-similar">{{ item.text }}</h5>
