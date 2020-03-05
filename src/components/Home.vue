@@ -117,7 +117,7 @@
                 <span
                   class="badge"
                   v-bind:class="[
-                    tags_same_as_result ? 'badge-danger' : 'badge-light'
+                    tagsSameAsResult ? 'badge-danger' : 'badge-light'
                   ]"
                   >{{ value }}</span
                 >
@@ -147,13 +147,13 @@
           <h3>
             Result: <span class="small">{{ queriesData.length }}</span>
           </h3>
-          <div v-if="queriesData.length === 0 && !no_results">
+          <div v-if="queriesData.length === 0 && !noResults">
             <div class="alert alert-info" role="alert">
               Generating, please wait.
             </div>
             <Loading></Loading>
           </div>
-          <div v-if="no_results">
+          <div v-if="noResults">
             <div class="alert alert-warning" role="alert">
               Your selection has no result.
             </div>
@@ -165,13 +165,13 @@
           >
             <div
               class="show-similar"
-              v-bind:class="{ active: similar_active }"
+              v-bind:class="{ active: similarActive }"
               v-on:click="sortSimilarObjects(item.cluster_id)"
             >
-              <div v-if="!similar_active">
+              <div v-if="!similarActive">
                 <i class="fas fa-greater-than-equal"></i> show similar records
               </div>
-              <div v-if="similar_active">
+              <div v-if="similarActive">
                 <i class="fas fa-less-than-equal"></i> show all records
               </div>
             </div>
@@ -224,12 +224,12 @@ export default {
       queriesData: [],
       facetData: [],
       limit: 5,
-      no_results: false,
-      tags_same_as_result: false,
+      noResults: false,
+      tagsSameAsResult: false,
       modelUuid: "",
       sortABC: false,
-      similar_active: false,
-      current_cluster_id: null
+      similarActive: false,
+      currentClusterId: null
     };
   },
   methods: {
@@ -326,7 +326,7 @@ export default {
       this.deletedList = [];
       this.facetData = [];
       this.queriesData = [];
-      this.no_results = false;
+      this.noResults = false;
       const Swal = require("sweetalert2");
       Swal.fire({
         icon: "success",
@@ -341,34 +341,6 @@ export default {
         }
       });
       this.loadContent();
-    },
-    clearFiltered: function() {
-      this.no_results = false;
-      this.filterByList = [];
-      this.queriesData = [...this.originalQueriesData];
-      this.groupCluster();
-      this.generate_facet(this.queriesData);
-    },
-    clearDeleted: function() {
-      this.no_results = false;
-      this.deletedList = [];
-      this.similar_active = false;
-      const Swal = require("sweetalert2");
-      Swal.fire({
-        title: "Generating new Cluster",
-        onBeforeOpen: () => {
-          Swal.showLoading();
-          this.loadContent();
-        },
-        showConfirmButton: false
-      });
-    },
-    groupCluster: function() {
-      if (this.similar_active) {
-        this.queriesData = this.queriesData.filter(
-          result => result["cluster_id"] == this.current_cluster_id
-        );
-      }
     },
     loadContent: async function() {
       const axios = require("axios");
@@ -399,7 +371,7 @@ export default {
         Swal.close();
       });
     },
-    generate_facet: function(obj) {
+    generateFacet: function(obj) {
       let facet = {};
 
       for (let i = 0; i < obj.length; i++) {
@@ -415,15 +387,15 @@ export default {
 
       let keys = Object.keys(facet);
       let results = this.queriesData.length;
-      this.tags_same_as_result = keys.every(val => facet[val] === results);
+      this.tagsSameAsResult = keys.every(val => facet[val] === results);
 
-      this.facetData = this.sort_object(facet);
+      this.facetData = this.sortObject(facet);
     },
     changeSort: function() {
       this.sortABC = !this.sortABC;
-      this.facetData = this.sort_object(this.facetData);
+      this.facetData = this.sortObject(this.facetData);
     },
-    sort_object: function(obj) {
+    sortObject: function(obj) {
       let items = Object.keys(obj).map(function(key) {
         return [key, obj[key]];
       });
@@ -449,27 +421,18 @@ export default {
       });
       return sorted_obj;
     },
-    removeFilter: function(item) {
-      this.no_results = false;
-      this.filterByList = this.filterByList.filter(e => e !== item);
-      this.queriesData = [...this.originalQueriesData];
-      for (let i = 0; i < this.filterByList.length; i++) {
-        this.queriesData = this.queriesData.filter(result =>
-          result["data"].includes(this.filterByList[i])
+    groupCluster: function() {
+      if (this.similarActive) {
+        this.queriesData = this.queriesData.filter(
+          result => result["cluster_id"] == this.currentClusterId
         );
       }
-      this.groupCluster();
-
-      if (this.queriesData.length === 0) {
-        this.no_results = true;
-      }
-      this.generate_facet(this.queriesData);
     },
     sortSimilarObjects: function(sortItem) {
-      this.similar_active = !this.similar_active;
-      this.current_cluster_id = null;
-      if (this.similar_active) {
-        this.current_cluster_id = sortItem;
+      this.similarActive = !this.similarActive;
+      this.currentClusterId = null;
+      if (this.similarActive) {
+        this.currentClusterId = sortItem;
       }
       this.removeFilter("");
     },
@@ -489,14 +452,37 @@ export default {
       this.queriesData = this.queriesData.filter(result =>
         result["data"].includes(item)
       );
-      this.generate_facet(this.queriesData);
+      this.generateFacet(this.queriesData);
+    },
+    clearFiltered: function() {
+      this.noResults = false;
+      this.filterByList = [];
+      this.queriesData = [...this.originalQueriesData];
+      this.groupCluster();
+      this.generateFacet(this.queriesData);
+    },
+    removeFilter: function(item) {
+      this.noResults = false;
+      this.filterByList = this.filterByList.filter(e => e !== item);
+      this.queriesData = [...this.originalQueriesData];
+      for (let i = 0; i < this.filterByList.length; i++) {
+        this.queriesData = this.queriesData.filter(result =>
+          result["data"].includes(this.filterByList[i])
+        );
+      }
+      this.groupCluster();
+
+      if (this.queriesData.length === 0) {
+        this.noResults = true;
+      }
+      this.generateFacet(this.queriesData);
     },
     addDeleted: function(item) {
       if (this.deletedList.includes(item)) {
         return;
       }
 
-      this.similar_active = false;
+      this.similarActive = false;
       this.deletedList.push(item);
       this.removeFilter(item);
       const Swal = require("sweetalert2");
@@ -510,10 +496,24 @@ export default {
         showConfirmButton: false
       });
     },
+    clearDeleted: function() {
+      this.noResults = false;
+      this.deletedList = [];
+      this.similarActive = false;
+      const Swal = require("sweetalert2");
+      Swal.fire({
+        title: "Generating new Cluster",
+        onBeforeOpen: () => {
+          Swal.showLoading();
+          this.loadContent();
+        },
+        showConfirmButton: false
+      });
+    },
     removeDeleted: function(item) {
       this.deletedList = this.deletedList.filter(e => e !== item);
 
-      this.similar_active = false;
+      this.similarActive = false;
 
       const Swal = require("sweetalert2");
       Swal.fire({
