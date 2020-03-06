@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <Home msg="KenSpace" />
+    <Home />
   </div>
 </template>
 
