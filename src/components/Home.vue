@@ -361,15 +361,30 @@ export default {
         headers: {
           Authorization: `Bearer ${localStorage.apiKey}`
         }
-      }).then(function(response) {
-        vueApp.originalQueriesData = response.data["results"];
-        vueApp.queriesData = response.data["results"];
-        vueApp.modelUuid = response.data["uuid"];
-        localStorage.modelUuid = response.data["uuid"];
+      })
+        .then(function(response) {
+          vueApp.originalQueriesData = response.data["results"];
+          vueApp.queriesData = response.data["results"];
+          vueApp.modelUuid = response.data["uuid"];
+          localStorage.modelUuid = response.data["uuid"];
 
-        vueApp.removeFilter("");
-        Swal.close();
-      });
+          vueApp.removeFilter("");
+          Swal.close();
+        })
+        .catch(() => {
+          Swal.fire({
+            title: "Oops... Something went wrong!",
+            text: "Please reset the app",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            confirmButtonText: "Reset App",
+            icon: "error"
+          }).then(result => {
+            if (result.value) {
+              vueApp.resetApp();
+            }
+          });
+        });
     },
     generateFacet: function(obj) {
       let facet = {};
