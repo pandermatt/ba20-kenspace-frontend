@@ -50,11 +50,17 @@
             </div>
             <div class="col-md-6">
               <div class="mt-4">
-                <input
-                  type="text"
-                  class="form-control"
-                  placeholder="Search..."
-                />
+                <div style="position: relative">
+                  <input
+                    type="text"
+                    class="search"
+                    placeholder="Search..."
+                    v-model="searchText"
+                    @change="search"
+                    @input="search"
+                  />
+                  <span class="focus-border"></span>
+                </div>
               </div>
             </div>
           </div>
@@ -99,48 +105,56 @@
             </button>
           </h3>
           <div class="sidebar-card">
-            <div v-if="facetData.length === 0">
+            <div v-if="Object.keys(facetData).length === 0">
               <Loading></Loading>
             </div>
             <div
-              v-for="(value, key) in facetData"
-              v-bind:key="key"
+              v-for="(item, idx) in Object.keys(facetData).slice(0, facetLimit)"
+              v-bind:key="idx"
               class="facet-badge"
             >
               <span
                 class="badge cursor-pointer"
-                v-on:click="toggleFilter(key)"
+                v-on:click="toggleFilter(item)"
                 v-bind:class="[
-                  filterByList.includes(key) ? 'badge-info' : 'badge-dark'
+                  filterByList.includes(item) ? 'badge-info' : 'badge-dark'
                 ]"
-                >{{ key }}
+                >{{ item }}
                 <span
                   class="badge"
                   v-bind:class="[
                     tagsSameAsResult ? 'badge-danger' : 'badge-light'
                   ]"
-                  >{{ value }}</span
+                  >{{ facetData[item] }}</span
                 >
               </span>
               <div class="action-box">
                 <div
-                  v-on:click="addFilter(key)"
-                  v-if="!filterByList.includes(key)"
+                  v-on:click="addFilter(item)"
+                  v-if="!filterByList.includes(item)"
                 >
                   <i class="ri-heart-line"></i> Pick
                 </div>
                 <div
-                  v-on:click="removeFilter(key)"
-                  v-if="filterByList.includes(key)"
+                  v-on:click="removeFilter(item)"
+                  v-if="filterByList.includes(item)"
                 >
                   <i class="ri-heart-2-line"></i> Unpick
                 </div>
                 <hr />
-                <div v-on:click="addDeleted(key)">
+                <div v-on:click="addDeleted(item)">
                   <i class="ri-delete-bin-2-line"></i> Remove
                 </div>
               </div>
             </div>
+            <button
+              type="button"
+              class="btn btn-light w-100 mt-4"
+              v-on:click="facetLimit = facetLimit + 200"
+              v-if="facetLimit < Object.keys(facetData).length"
+            >
+              Show More
+            </button>
           </div>
         </nav>
         <div id="content" v-bind:class="{ active: showMobileMenu }">
@@ -160,7 +174,7 @@
           </div>
           <div
             class="card content-card"
-            v-for="(item, idx) in queriesData.slice(0, limit)"
+            v-for="(item, idx) in queriesData.slice(0, queryLimit)"
             v-bind:key="idx"
           >
             <div
@@ -192,8 +206,8 @@
           <button
             type="button"
             class="btn btn-light w-100"
-            v-on:click="limit = limit + 5"
-            v-if="limit < queriesData.length"
+            v-on:click="queryLimit = queryLimit + 5"
+            v-if="queryLimit < queriesData.length"
           >
             Show More
           </button>
@@ -222,8 +236,10 @@ export default {
       filterByList: [],
       deletedList: [],
       queriesData: [],
-      facetData: [],
-      limit: 5,
+      facetData: {},
+      queryLimit: 10,
+      facetLimit: 200,
+      searchText: "",
       noResults: false,
       tagsSameAsResult: false,
       modelUuid: "",
@@ -324,9 +340,11 @@ export default {
       localStorage.modelUuid = "";
       this.filterByList = [];
       this.deletedList = [];
-      this.facetData = [];
+      this.facetData = {};
       this.queriesData = [];
       this.noResults = false;
+      this.facetLimit = 200;
+      this.queryLimit = 10;
       const Swal = require("sweetalert2");
       Swal.fire({
         icon: "success",
@@ -462,7 +480,7 @@ export default {
       if (this.filterByList.includes(item)) {
         return;
       }
-      this.limit = 5;
+      this.queryLimit = 5;
       this.filterByList.push(item);
       this.queriesData = this.queriesData.filter(result =>
         result["data"].includes(item)
@@ -474,7 +492,24 @@ export default {
       this.filterByList = [];
       this.queriesData = [...this.originalQueriesData];
       this.groupCluster();
+      this.filterBySearch();
       this.generateFacet(this.queriesData);
+    },
+    filterBySearch: function() {
+      if (this.searchText !== "") {
+        const Fuse = require("fuse.js");
+        let options = {
+          shouldSort: true,
+          threshold: 0.6,
+          location: 0,
+          distance: 100,
+          maxPatternLength: 32,
+          minMatchCharLength: 1,
+          keys: ["text", "content"]
+        };
+        let fuse = new Fuse(this.queriesData, options);
+        this.queriesData = fuse.search(this.searchText);
+      }
     },
     removeFilter: function(item) {
       this.noResults = false;
@@ -487,9 +522,11 @@ export default {
       }
       this.groupCluster();
 
+      this.filterBySearch();
       if (this.queriesData.length === 0) {
         this.noResults = true;
       }
+
       this.generateFacet(this.queriesData);
     },
     addDeleted: function(item) {
@@ -540,6 +577,19 @@ export default {
         },
         showConfirmButton: false
       });
+    },
+    search: function(event) {
+      if (this.searchText === "") {
+        this.queriesData = [...this.originalQueriesData];
+        this.removeFilter("");
+        return;
+      }
+
+      if (!event.data && event.type !== "change") {
+        return;
+      }
+
+      this.removeFilter("");
     }
   },
   watch: {
@@ -851,5 +901,30 @@ export default {
   width: 200px;
   padding: 5px 10px;
   border-radius: 0 3px 0 3px;
+}
+
+.search {
+  border: 0;
+  border-bottom: 1px solid #ccc;
+  width: 100%;
+  padding: 8px;
+  border-radius: 5px 5px 0 0;
+  &:focus {
+    outline: none;
+  }
+}
+.search ~ .focus-border {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background-color: #3399ff;
+  transition: 0.4s;
+}
+.search:focus ~ .focus-border {
+  width: 100%;
+  transition: 0.4s;
+  left: 0;
 }
 </style>
