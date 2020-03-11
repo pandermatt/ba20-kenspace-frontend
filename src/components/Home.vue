@@ -160,6 +160,10 @@
         <div id="content" v-bind:class="{ active: showMobileMenu }">
           <h3>
             Result: <span class="small">{{ queriesData.length }}</span>
+            <ProgressBar
+              :result="queriesData.length"
+              :result-total="originalQueriesData.length"
+            />
           </h3>
           <div v-if="queriesData.length === 0 && !noResults">
             <div class="alert alert-info" role="alert">
@@ -221,10 +225,11 @@
 <script>
 import Footer from "./Footer";
 import Loading from "./Loading";
+import ProgressBar from "./ProgressBar";
 
 export default {
   name: "Home",
-  components: { Loading, Footer },
+  components: { ProgressBar, Loading, Footer },
   props: {
     msg: String
   },
