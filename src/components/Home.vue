@@ -326,6 +326,14 @@ export default {
     },
     logout: function() {
       this.apiKey = "";
+      localStorage.modelUuid = "";
+      this.filterByList = [];
+      this.deletedList = [];
+      this.facetData = {};
+      this.queriesData = [];
+      this.noResults = false;
+      this.facetLimit = 200;
+      this.queryLimit = 10;
       const Swal = require("sweetalert2");
       Swal.fire({
         icon: "success",
