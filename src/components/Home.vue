@@ -334,6 +334,7 @@ export default {
       this.noResults = false;
       this.facetLimit = 200;
       this.queryLimit = 10;
+      this.searchText = "";
       const Swal = require("sweetalert2");
       Swal.fire({
         icon: "success",
@@ -358,6 +359,7 @@ export default {
       this.noResults = false;
       this.facetLimit = 200;
       this.queryLimit = 10;
+      this.searchText = "";
       const Swal = require("sweetalert2");
       Swal.fire({
         icon: "success",
@@ -547,7 +549,6 @@ export default {
         return;
       }
 
-      this.similarActive = false;
       this.deletedList.push(item);
       this.removeFilter(item);
       const Swal = require("sweetalert2");
@@ -564,7 +565,6 @@ export default {
     clearDeleted: function() {
       this.noResults = false;
       this.deletedList = [];
-      this.similarActive = false;
       const Swal = require("sweetalert2");
       Swal.fire({
         title: "Generating new Cluster",
@@ -577,8 +577,6 @@ export default {
     },
     removeDeleted: function(item) {
       this.deletedList = this.deletedList.filter(e => e !== item);
-
-      this.similarActive = false;
 
       const Swal = require("sweetalert2");
       Swal.fire({
