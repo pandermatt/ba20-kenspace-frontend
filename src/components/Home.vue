@@ -195,9 +195,15 @@
                 <i class="fas fa-less-than-equal"></i> show all records
               </div>
             </div>
-            <div class="card-body">
+            <div class="card-header" v-if="item.meta_info.image">
+              <img :src="item.meta_info.image" alt="Movie Cover" />
+            </div>
+            <div
+              class="card-body"
+              v-bind:class="{ 'card-body-with-image': item.meta_info.image }"
+            >
               <h5 class="card-title card-title-similar">{{ item.text }}</h5>
-              <p class="small">{{ item.content }}</p>
+              <p class="small">{{ item.meta_info.content }}</p>
               <div>
                 <span
                   v-for="(content, idx) in item.data"
@@ -538,7 +544,7 @@ export default {
           distance: 100,
           maxPatternLength: 32,
           minMatchCharLength: 1,
-          keys: ["text", "content"]
+          keys: ["text", "meta_info.content"]
         };
         let fuse = new Fuse(this.queriesData, options);
         this.queriesData = fuse.search(this.searchText);
@@ -820,6 +826,32 @@ export default {
   padding-top: 30px;
 }
 
+@media (min-width: 1270px) {
+  .card-body-with-image {
+    margin-left: 200px;
+  }
+
+  .card-header {
+    position: absolute;
+    display: block;
+    height: 100%;
+    padding: 0;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 3px 0 0 3px;
+    }
+  }
+}
+
+@media (max-width: 1269px) {
+  .card-header {
+    display: none;
+  }
+}
+
 .list-enter-active,
 .list-leave-active {
   transition: all 1s;
@@ -938,10 +970,12 @@ export default {
   width: 100%;
   padding: 8px;
   border-radius: 5px 5px 0 0;
+
   &:focus {
     outline: none;
   }
 }
+
 .search ~ .focus-border {
   position: absolute;
   bottom: 0;
@@ -951,6 +985,7 @@ export default {
   background-color: #3399ff;
   transition: 0.4s;
 }
+
 .search:focus ~ .focus-border {
   width: 100%;
   transition: 0.4s;
