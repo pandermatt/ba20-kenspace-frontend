@@ -134,6 +134,8 @@
                   v-if="!filterByList.includes(item)"
                 >
                   <i class="ri-heart-line"></i> Pick
+                  <i class="far fa-object-group" style="margin-left: 6px"></i>
+                  {{ facetClusterNumber[item].length }}
                 </div>
                 <div
                   v-on:click="removeFilter(item)"
@@ -242,6 +244,8 @@ export default {
       deletedList: [],
       queriesData: [],
       facetData: {},
+      facetClusterNumber: {},
+      maxFacetClusterNumber: null,
       queryLimit: 10,
       facetLimit: 200,
       searchText: "",
@@ -252,6 +256,13 @@ export default {
       similarActive: false,
       currentClusterId: null
     };
+  },
+  computed: {
+    badgeHeatMap(color) {
+      return {
+        width: `${color}%`
+      };
+    }
   },
   methods: {
     login: async function() {
@@ -421,18 +432,25 @@ export default {
     },
     generateFacet: function(obj) {
       let facet = {};
+      let facetClusterNumber = {};
 
       for (let i = 0; i < obj.length; i++) {
-        let cluster_data = obj[i].data;
-        for (let j = 0; j < cluster_data.length; j++) {
-          if (cluster_data[j] in facet) {
-            facet[cluster_data[j]] = facet[cluster_data[j]] + 1;
+        let clusterData = obj[i].data;
+        let clusterId = obj[i].cluster_id;
+        for (let j = 0; j < clusterData.length; j++) {
+          if (clusterData[j] in facet) {
+            facet[clusterData[j]]++;
+            if (!facetClusterNumber[clusterData[j]].includes(clusterId)) {
+              facetClusterNumber[clusterData[j]].push(clusterId);
+            }
           } else {
-            facet[cluster_data[j]] = 1;
+            facet[clusterData[j]] = 1;
+            facetClusterNumber[clusterData[j]] = [clusterId];
           }
         }
       }
 
+      this.facetClusterNumber = facetClusterNumber;
       let keys = Object.keys(facet);
       let results = this.queriesData.length;
       this.tagsSameAsResult = keys.every(val => facet[val] === results);
@@ -871,7 +889,7 @@ export default {
     div {
       padding-right: 8px;
       padding-left: 8px;
-      width: 100px;
+      width: 140px;
 
       &:hover {
         color: red;
@@ -892,7 +910,7 @@ export default {
     &:hover {
       transition: all 0.2s;
       height: 90px;
-      width: 100px;
+      width: 140px;
     }
   }
 }
