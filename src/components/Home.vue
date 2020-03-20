@@ -7,10 +7,21 @@
           <span class="badge badge-secondary">Beta</span>
         </h1>
         <div v-if="apiKey">
-          <p><b>Hello!</b> <a v-on:click="logout" href="#">logout</a></p>
-          <a v-on:click="clearFiltered" href="#">clear picked</a> |
-          <a v-on:click="clearDeleted" href="#">clear deleted</a> |
-          <a v-on:click="resetApp" href="#">reset & generate new model</a>
+          <p>
+            <b>Hello!</b>
+            <button v-on:click="logout" class="link-style">logout</button>
+          </p>
+          <button v-on:click="clearFiltered" class="link-style">
+            clear picked
+          </button>
+          |
+          <button v-on:click="clearDeleted" class="link-style">
+            clear deleted
+          </button>
+          |
+          <button v-on:click="resetApp" class="link-style">
+            reset & generate new model
+          </button>
           <div class="row">
             <div class="col-md-6">
               <div class="display-filter">
@@ -74,9 +85,9 @@
           This page is currently only accessible for registered beta users.
         </p>
         <hr class="my-4" />
-        <a v-on:click="login" href="#"
-          >Click here if you have received a beta key</a
-        >
+        <button v-on:click="login" class="link-style">
+          Click here if you have received a beta key
+        </button>
       </div>
     </div>
     <div v-if="apiKey" class="home-box">
@@ -831,6 +842,11 @@ export default {
     margin-left: 200px;
   }
 
+  .card-footer-with-image {
+    margin-left: 185px;
+    padding-left: 35px;
+  }
+
   .card-header {
     position: absolute;
     display: block;
@@ -990,5 +1006,15 @@ export default {
   width: 100%;
   transition: 0.4s;
   left: 0;
+}
+
+.link-style {
+  color: #007bff;
+  border: none;
+  background: transparent;
+  padding: 0;
+  &:hover {
+    text-decoration: underline;
+  }
 }
 </style>
