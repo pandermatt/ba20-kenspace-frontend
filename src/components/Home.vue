@@ -225,6 +225,16 @@
                 </span>
               </div>
             </div>
+            <div
+              class="card-footer"
+              v-bind:class="{ 'card-footer-with-image': item.meta_info.image }"
+            >
+              <FeedbackButtons
+                :submitted="false"
+                v-on:up="shareFeedback('yes', item.text)"
+                v-on:down="shareFeedback('no', item.text)"
+              />
+            </div>
           </div>
           <button
             type="button"
@@ -245,10 +255,11 @@
 import Footer from "./Footer";
 import Loading from "./Loading";
 import ProgressBar from "./ProgressBar";
+import FeedbackButtons from "./FeedbackButtons";
 
 export default {
   name: "Home",
-  components: { ProgressBar, Loading, Footer },
+  components: { FeedbackButtons, ProgressBar, Loading, Footer },
   props: {
     msg: String
   },
@@ -636,6 +647,28 @@ export default {
       }
 
       this.removeFilter("");
+    },
+    shareFeedback: function(isHelpful, title) {
+      let params = {
+        uuid: localStorage.modelUuid,
+        isHelpful: isHelpful,
+        movieTitle: title,
+        similarClusterActive: this.similarActive,
+        search: this.searchText,
+        facet: JSON.stringify(this.filterByList),
+        delete: JSON.stringify(this.deletedList),
+        resultCount: this.queriesData.length
+      };
+      const axios = require("axios");
+
+      axios({
+        method: "POST",
+        url: `${process.env.VUE_APP_BACKEND_URL}/feedback/`,
+        params: params,
+        headers: {
+          Authorization: `Bearer ${localStorage.apiKey}`
+        }
+      });
     }
   },
   watch: {
