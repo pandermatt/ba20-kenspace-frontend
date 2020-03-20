@@ -8,7 +8,7 @@
         </h1>
         <div v-if="apiKey">
           <p>
-            <b>Hello!</b>
+            <b>Hello!</b>&nbsp;
             <button v-on:click="logout" class="link-style">logout</button>
           </p>
           <button v-on:click="clearFiltered" class="link-style">
