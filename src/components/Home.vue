@@ -7,10 +7,21 @@
           <span class="badge badge-secondary">Beta</span>
         </h1>
         <div v-if="apiKey">
-          <p><b>Hello!</b> <a v-on:click="logout" href="#">logout</a></p>
-          <a v-on:click="clearFiltered" href="#">clear picked</a> |
-          <a v-on:click="clearDeleted" href="#">clear deleted</a> |
-          <a v-on:click="resetApp" href="#">reset & generate new model</a>
+          <p>
+            <b>Hello!</b>
+            <button v-on:click="logout" class="link-style">logout</button>
+          </p>
+          <button v-on:click="clearFiltered" class="link-style">
+            clear picked
+          </button>
+          |
+          <button v-on:click="clearDeleted" class="link-style">
+            clear deleted
+          </button>
+          |
+          <button v-on:click="resetApp" class="link-style">
+            reset & generate new model
+          </button>
           <div class="row">
             <div class="col-md-6">
               <div class="display-filter">
@@ -74,9 +85,9 @@
           This page is currently only accessible for registered beta users.
         </p>
         <hr class="my-4" />
-        <a v-on:click="login" href="#"
-          >Click here if you have received a beta key</a
-        >
+        <button v-on:click="login" class="link-style">
+          Click here if you have received a beta key
+        </button>
       </div>
     </div>
     <div v-if="apiKey" class="home-box">
@@ -134,6 +145,8 @@
                   v-if="!filterByList.includes(item)"
                 >
                   <i class="ri-heart-line"></i> Pick
+                  <i class="far fa-object-group" style="margin-left: 6px"></i>
+                  {{ facetClusterNumber[item].length }}
                 </div>
                 <div
                   v-on:click="removeFilter(item)"
@@ -193,9 +206,15 @@
                 <i class="fas fa-less-than-equal"></i> show all records
               </div>
             </div>
-            <div class="card-body">
+            <div class="card-header" v-if="item.meta_info.image">
+              <img :src="item.meta_info.image" alt="Movie Cover" />
+            </div>
+            <div
+              class="card-body"
+              v-bind:class="{ 'card-body-with-image': item.meta_info.image }"
+            >
               <h5 class="card-title card-title-similar">{{ item.text }}</h5>
-              <p class="small">{{ item.content }}</p>
+              <p class="small">{{ item.meta_info.content }}</p>
               <div>
                 <span
                   v-for="(content, idx) in item.data"
@@ -205,6 +224,16 @@
                   >{{ content }}
                 </span>
               </div>
+            </div>
+            <div
+              class="card-footer"
+              v-bind:class="{ 'card-footer-with-image': item.meta_info.image }"
+            >
+              <FeedbackButtons
+                :submitted="false"
+                v-on:up="shareFeedback('yes', item.text)"
+                v-on:down="shareFeedback('no', item.text)"
+              />
             </div>
           </div>
           <button
@@ -226,10 +255,11 @@
 import Footer from "./Footer";
 import Loading from "./Loading";
 import ProgressBar from "./ProgressBar";
+import FeedbackButtons from "./FeedbackButtons";
 
 export default {
   name: "Home",
-  components: { ProgressBar, Loading, Footer },
+  components: { FeedbackButtons, ProgressBar, Loading, Footer },
   props: {
     msg: String
   },
@@ -242,6 +272,8 @@ export default {
       deletedList: [],
       queriesData: [],
       facetData: {},
+      facetClusterNumber: {},
+      maxFacetClusterNumber: null,
       queryLimit: 10,
       facetLimit: 200,
       searchText: "",
@@ -252,6 +284,13 @@ export default {
       similarActive: false,
       currentClusterId: null
     };
+  },
+  computed: {
+    badgeHeatMap(color) {
+      return {
+        width: `${color}%`
+      };
+    }
   },
   methods: {
     login: async function() {
@@ -334,6 +373,7 @@ export default {
       this.noResults = false;
       this.facetLimit = 200;
       this.queryLimit = 10;
+      this.searchText = "";
       const Swal = require("sweetalert2");
       Swal.fire({
         icon: "success",
@@ -358,6 +398,7 @@ export default {
       this.noResults = false;
       this.facetLimit = 200;
       this.queryLimit = 10;
+      this.searchText = "";
       const Swal = require("sweetalert2");
       Swal.fire({
         icon: "success",
@@ -419,18 +460,25 @@ export default {
     },
     generateFacet: function(obj) {
       let facet = {};
+      let facetClusterNumber = {};
 
       for (let i = 0; i < obj.length; i++) {
-        let cluster_data = obj[i].data;
-        for (let j = 0; j < cluster_data.length; j++) {
-          if (cluster_data[j] in facet) {
-            facet[cluster_data[j]] = facet[cluster_data[j]] + 1;
+        let clusterData = obj[i].data;
+        let clusterId = obj[i].cluster_id;
+        for (let j = 0; j < clusterData.length; j++) {
+          if (clusterData[j] in facet) {
+            facet[clusterData[j]]++;
+            if (!facetClusterNumber[clusterData[j]].includes(clusterId)) {
+              facetClusterNumber[clusterData[j]].push(clusterId);
+            }
           } else {
-            facet[cluster_data[j]] = 1;
+            facet[clusterData[j]] = 1;
+            facetClusterNumber[clusterData[j]] = [clusterId];
           }
         }
       }
 
+      this.facetClusterNumber = facetClusterNumber;
       let keys = Object.keys(facet);
       let results = this.queriesData.length;
       this.tagsSameAsResult = keys.every(val => facet[val] === results);
@@ -518,7 +566,7 @@ export default {
           distance: 100,
           maxPatternLength: 32,
           minMatchCharLength: 1,
-          keys: ["text", "content"]
+          keys: ["text", "meta_info.content"]
         };
         let fuse = new Fuse(this.queriesData, options);
         this.queriesData = fuse.search(this.searchText);
@@ -547,7 +595,6 @@ export default {
         return;
       }
 
-      this.similarActive = false;
       this.deletedList.push(item);
       this.removeFilter(item);
       const Swal = require("sweetalert2");
@@ -564,7 +611,6 @@ export default {
     clearDeleted: function() {
       this.noResults = false;
       this.deletedList = [];
-      this.similarActive = false;
       const Swal = require("sweetalert2");
       Swal.fire({
         title: "Generating new Cluster",
@@ -577,8 +623,6 @@ export default {
     },
     removeDeleted: function(item) {
       this.deletedList = this.deletedList.filter(e => e !== item);
-
-      this.similarActive = false;
 
       const Swal = require("sweetalert2");
       Swal.fire({
@@ -603,6 +647,28 @@ export default {
       }
 
       this.removeFilter("");
+    },
+    shareFeedback: function(isHelpful, title) {
+      let params = {
+        uuid: localStorage.modelUuid,
+        isHelpful: isHelpful,
+        movieTitle: title,
+        similarClusterActive: this.similarActive,
+        search: this.searchText,
+        facet: JSON.stringify(this.filterByList),
+        delete: JSON.stringify(this.deletedList),
+        resultCount: this.queriesData.length
+      };
+      const axios = require("axios");
+
+      axios({
+        method: "POST",
+        url: `${process.env.VUE_APP_BACKEND_URL}/feedback/`,
+        params: params,
+        headers: {
+          Authorization: `Bearer ${localStorage.apiKey}`
+        }
+      });
     }
   },
   watch: {
@@ -804,6 +870,37 @@ export default {
   padding-top: 30px;
 }
 
+@media (min-width: 1270px) {
+  .card-body-with-image {
+    margin-left: 200px;
+  }
+
+  .card-footer-with-image {
+    margin-left: 185px;
+    padding-left: 35px;
+  }
+
+  .card-header {
+    position: absolute;
+    display: block;
+    height: 100%;
+    padding: 0;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 3px 0 0 3px;
+    }
+  }
+}
+
+@media (max-width: 1269px) {
+  .card-header {
+    display: none;
+  }
+}
+
 .list-enter-active,
 .list-leave-active {
   transition: all 1s;
@@ -873,7 +970,7 @@ export default {
     div {
       padding-right: 8px;
       padding-left: 8px;
-      width: 100px;
+      width: 140px;
 
       &:hover {
         color: red;
@@ -894,7 +991,7 @@ export default {
     &:hover {
       transition: all 0.2s;
       height: 90px;
-      width: 100px;
+      width: 140px;
     }
   }
 }
@@ -922,10 +1019,12 @@ export default {
   width: 100%;
   padding: 8px;
   border-radius: 5px 5px 0 0;
+
   &:focus {
     outline: none;
   }
 }
+
 .search ~ .focus-border {
   position: absolute;
   bottom: 0;
@@ -935,9 +1034,20 @@ export default {
   background-color: #3399ff;
   transition: 0.4s;
 }
+
 .search:focus ~ .focus-border {
   width: 100%;
   transition: 0.4s;
   left: 0;
+}
+
+.link-style {
+  color: #007bff;
+  border: none;
+  background: transparent;
+  padding: 0;
+  &:hover {
+    text-decoration: underline;
+  }
 }
 </style>
