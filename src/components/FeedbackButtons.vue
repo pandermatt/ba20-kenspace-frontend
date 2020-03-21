@@ -33,6 +33,11 @@ export default {
   background: transparent;
   padding: 0;
   color: #007bff;
+
+  &:focus {
+    outline: 0;
+  }
+
   &:hover {
     text-decoration: underline;
   }
