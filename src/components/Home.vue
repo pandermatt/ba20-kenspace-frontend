@@ -228,6 +228,7 @@
             <div
               class="card-footer"
               v-bind:class="{ 'card-footer-with-image': item.meta_info.image }"
+              v-if="queriesData.length !== originalQueriesData.length"
             >
               <FeedbackButtons
                 :submitted="false"
@@ -642,7 +643,10 @@ export default {
         return;
       }
 
-      if (!event.data && event.type !== "change") {
+      if (
+        (this.searchText.length <= 3 || !event.data) &&
+        event.type !== "change"
+      ) {
         return;
       }
 
