@@ -59,20 +59,21 @@
                 </transition-group>
               </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-6" v-if="originalQueriesData.length !== 0">
               <div class="mt-4 search-bar">
                 <div style="position: relative">
                   <input
                     type="text"
                     class="search"
                     v-model="searchText"
-                    @change="search"
                     @input="search"
                   />
                   <span class="focus-border"></span>
                 </div>
               </div>
-              <button class="btn btn-primary btn-search">Search</button>
+              <button class="btn btn-primary btn-search" v-on:click="search">
+                Search
+              </button>
             </div>
           </div>
         </div>
@@ -286,7 +287,8 @@ export default {
       sortABC: false,
       similarActive: false,
       currentClusterId: null,
-      upload: false
+      upload: false,
+      removeFilterFunc: null
     };
   },
   computed: {
@@ -384,6 +386,7 @@ export default {
       this.queryLimit = 10;
       this.searchText = "";
       localStorage.settings = "";
+      this.similarActive = false;
       const Swal = require("sweetalert2");
       Swal.fire({
         icon: "success",
@@ -400,7 +403,30 @@ export default {
       });
     },
     resetApp: function() {
-      this.logout();
+      localStorage.modelUuid = "";
+      this.filterByList = [];
+      this.deletedList = [];
+      this.facetData = {};
+      this.queriesData = [];
+      this.noResults = false;
+      this.facetLimit = 200;
+      this.queryLimit = 10;
+      this.searchText = "";
+      this.similarActive = false;
+      const Swal = require("sweetalert2");
+      Swal.fire({
+        icon: "success",
+        title: "Generating new Cluster",
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true,
+        onOpen: toast => {
+          toast.addEventListener("mouseenter", Swal.stopTimer);
+          toast.addEventListener("mouseleave", Swal.resumeTimer);
+        }
+      });
+      this.loadContent();
     },
     loadContent: async function() {
       const axios = require("axios");
@@ -445,7 +471,7 @@ export default {
             icon: "error"
           }).then(result => {
             if (result.value) {
-              vueApp.resetApp();
+              vueApp.logout();
             }
           });
         });
@@ -627,21 +653,14 @@ export default {
         showConfirmButton: false
       });
     },
-    search: function(event) {
+    search: function() {
       if (this.searchText === "") {
         this.queriesData = [...this.originalQueriesData];
         this.removeFilter("");
         return;
       }
 
-      if (
-        (this.searchText.length <= 3 || !event.data) &&
-        event.type !== "change"
-      ) {
-        return;
-      }
-
-      this.removeFilter("");
+      this.removeFilterFunc("");
     },
     shareFeedback: function(isHelpful, title) {
       let params = {
@@ -678,6 +697,8 @@ export default {
     }
   },
   mounted() {
+    const lodash = require("lodash");
+    this.removeFilterFunc = lodash.debounce(this.removeFilter, 400);
     if (localStorage.filterByList) {
       this.filterByList = JSON.parse(localStorage.filterByList);
     }
