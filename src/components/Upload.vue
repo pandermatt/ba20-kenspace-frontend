@@ -110,7 +110,11 @@ export default {
       this.filename = result["filename"];
     },
     start() {
-      if (this.pickedContent === "" || this.pickedDisplay === "") {
+      if (
+        this.pickedContent === "" ||
+        this.pickedDisplay === "" ||
+        this.language === ""
+      ) {
         return;
       }
 

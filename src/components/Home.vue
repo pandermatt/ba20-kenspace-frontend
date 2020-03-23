@@ -184,6 +184,9 @@
             <div class="alert alert-info" role="alert">
               Generating, please wait.
             </div>
+            <div class="alert alert-warning" role="alert">
+              Please do not refresh this page.
+            </div>
             <Loading></Loading>
           </div>
           <div v-if="noResults">
