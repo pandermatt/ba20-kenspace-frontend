@@ -59,20 +59,21 @@
                 </transition-group>
               </div>
             </div>
-            <div class="col-md-6">
-              <div class="mt-4">
+            <div class="col-md-6" v-if="originalQueriesData.length !== 0">
+              <div class="mt-4 search-bar">
                 <div style="position: relative">
                   <input
                     type="text"
                     class="search"
-                    placeholder="Search..."
                     v-model="searchText"
-                    @change="search"
                     @input="search"
                   />
                   <span class="focus-border"></span>
                 </div>
               </div>
+              <button class="btn btn-primary btn-search" v-on:click="search">
+                Search
+              </button>
             </div>
           </div>
         </div>
@@ -90,7 +91,8 @@
         </button>
       </div>
     </div>
-    <div v-if="apiKey" class="home-box">
+    <Upload v-if="apiKey && upload" v-on:finished="loadContent" />
+    <div v-if="apiKey && !upload" class="home-box">
       <div
         class="hamburger cursor-pointer"
         id="hamburger-circle"
@@ -257,10 +259,11 @@ import Footer from "./Footer";
 import Loading from "./Loading";
 import ProgressBar from "./ProgressBar";
 import FeedbackButtons from "./FeedbackButtons";
+import Upload from "./Upload";
 
 export default {
   name: "Home",
-  components: { FeedbackButtons, ProgressBar, Loading, Footer },
+  components: { Upload, FeedbackButtons, ProgressBar, Loading, Footer },
   props: {
     msg: String
   },
@@ -283,7 +286,9 @@ export default {
       modelUuid: "",
       sortABC: false,
       similarActive: false,
-      currentClusterId: null
+      currentClusterId: null,
+      upload: false,
+      removeFilterFunc: null
     };
   },
   computed: {
@@ -350,7 +355,12 @@ export default {
                 }
               });
               localStorage.apiKey = password;
-              vueApp.loadContent();
+
+              if (password.split(":")[1] === "custom") {
+                vueApp.upload = true;
+              } else {
+                vueApp.loadContent();
+              }
             }
           })
           .catch(function() {
@@ -375,6 +385,8 @@ export default {
       this.facetLimit = 200;
       this.queryLimit = 10;
       this.searchText = "";
+      localStorage.settings = "";
+      this.similarActive = false;
       const Swal = require("sweetalert2");
       Swal.fire({
         icon: "success",
@@ -400,6 +412,7 @@ export default {
       this.facetLimit = 200;
       this.queryLimit = 10;
       this.searchText = "";
+      this.similarActive = false;
       const Swal = require("sweetalert2");
       Swal.fire({
         icon: "success",
@@ -418,6 +431,7 @@ export default {
     loadContent: async function() {
       const axios = require("axios");
       const Swal = require("sweetalert2");
+      this.upload = false;
       const vueApp = this;
       let params = {};
       if (localStorage.modelUuid) {
@@ -425,6 +439,9 @@ export default {
       }
       if (this.deletedList.length !== 0) {
         params = { ...params, deletedWords: JSON.stringify(this.deletedList) };
+      }
+      if (localStorage.settings) {
+        params = { ...params, settings: localStorage.settings };
       }
 
       axios({
@@ -454,7 +471,7 @@ export default {
             icon: "error"
           }).then(result => {
             if (result.value) {
-              vueApp.resetApp();
+              vueApp.logout();
             }
           });
         });
@@ -636,21 +653,14 @@ export default {
         showConfirmButton: false
       });
     },
-    search: function(event) {
+    search: function() {
       if (this.searchText === "") {
         this.queriesData = [...this.originalQueriesData];
         this.removeFilter("");
         return;
       }
 
-      if (
-        (this.searchText.length <= 3 || !event.data) &&
-        event.type !== "change"
-      ) {
-        return;
-      }
-
-      this.removeFilter("");
+      this.removeFilterFunc("");
     },
     shareFeedback: function(isHelpful, title) {
       let params = {
@@ -687,6 +697,8 @@ export default {
     }
   },
   mounted() {
+    const lodash = require("lodash");
+    this.removeFilterFunc = lodash.debounce(this.removeFilter, 400);
     if (localStorage.filterByList) {
       this.filterByList = JSON.parse(localStorage.filterByList);
     }
@@ -1058,5 +1070,16 @@ export default {
   &:hover {
     text-decoration: underline;
   }
+}
+
+.btn-search {
+  display: inline-block;
+  margin-left: 10px;
+  width: calc(30% - 10px);
+}
+
+.search-bar {
+  display: inline-block;
+  width: 70%;
 }
 </style>

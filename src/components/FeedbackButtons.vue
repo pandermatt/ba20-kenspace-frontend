@@ -17,7 +17,7 @@
 <script>
 export default {
   props: {
-    submitted: String
+    submitted: Boolean
   },
   methods: {
     share(shareType) {
