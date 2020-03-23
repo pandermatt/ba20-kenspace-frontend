@@ -90,7 +90,7 @@ export default {
   data: function() {
     return {
       dropzoneOptions: {
-        url: "http://127.0.0.1:5000/upload/",
+        url: `${process.env.VUE_APP_BACKEND_URL}/upload/`,
         acceptedFiles: "text/csv",
         maxFiles: 1,
         maxFilesize: 20,
