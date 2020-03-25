@@ -3,15 +3,32 @@
     <h1>Analyze your own data</h1>
     <small>Currently only CSV Files (with "," separated) are supported</small>
 
-    <vue-dropzone
-      ref="myVueDropzone"
-      id="dropzone"
-      :options="dropzoneOptions"
-      @vdropzone-complete="afterComplete"
-    ></vue-dropzone>
-    <button @click="removeFile" class="btn btn-danger mt-2 mb-2">
-      Remove All Files
-    </button>
+    <div class="alert alert-warning mt-2 mb-2" role="alert">
+      <h1 v-if="showWarning">Warning!</h1>
+      <p>
+        Your data will be uploaded directly to the server. If you do not want to
+        share your data or if you do not have the rights of the data,
+        <b>DO NOT</b> upload them.
+      </p>
+      <button
+        v-if="showWarning"
+        v-on:click="showWarning = false"
+        class="btn btn-danger mt-2 mb-2"
+      >
+        I understand
+      </button>
+    </div>
+    <div v-if="!showWarning">
+      <vue-dropzone
+        ref="myVueDropzone"
+        id="dropzone"
+        :options="dropzoneOptions"
+        @vdropzone-complete="afterComplete"
+      ></vue-dropzone>
+      <button @click="removeFile" class="btn btn-danger mt-2 mb-2">
+        Remove All Files
+      </button>
+    </div>
 
     <div v-if="cols">
       <table class="table mt-2 mb-2">
@@ -100,7 +117,8 @@ export default {
       pickedDisplay: "",
       pickedContent: "",
       filename: "",
-      language: ""
+      language: "",
+      showWarning: true
     };
   },
   methods: {
