@@ -2,7 +2,6 @@
   <div class="container" style="margin-top: -100px;">
     <h1>Analyze your own data</h1>
     <small>Currently only CSV Files (with "," separated) are supported</small>
-
     <div class="alert alert-warning mt-2 mb-2" role="alert">
       <h1 v-if="showWarning">Warning!</h1>
       <p>
@@ -105,13 +104,7 @@
           </label>
         </p>
       </div>
-      <div
-        class="alert alert-danger"
-        role="alert"
-        v-if="language === '' && validated"
-      >
-        Select language
-      </div>
+
       <h3 class="mt-4 mb-2">Language Analysis Techniques</h3>
       <div>
         <p>
@@ -162,19 +155,75 @@
         </p>
       </div>
       <div
-        class="alert alert-danger"
-        role="alert"
-        v-if="techniques === '' && validated"
-      >
-        Select Language Analysis Techniques
-      </div>
-      <div
         class="alert alert-warning"
         role="alert"
         v-if="!['german', 'english'].includes(language)"
       >
         <span class="upload-label">{{ language }}</span> does not support
         user-defined "Language Analysis Techniques"
+      </div>
+
+      <h3 class="mt-4 mb-2">Recommendation Set Size</h3>
+      <div>
+        <p>
+          <label>
+            <input
+              class="mr-2"
+              type="radio"
+              name="clusterSize"
+              value="large"
+              v-model="clusterSize"
+            />Large
+            <span class="text-muted font-italic ml-2"
+              >This will result in {{ recommendationSet["large"][0] }} items per
+              set and {{ recommendationSet["large"][1] }} recommendation groups,
+              Fastest</span
+            >
+          </label>
+        </p>
+      </div>
+      <div>
+        <p>
+          <label>
+            <input
+              class="mr-2"
+              type="radio"
+              name="clusterSize"
+              value="medium"
+              v-model="clusterSize"
+            />Medium
+            <span class="text-muted font-italic ml-2"
+              >This will result in {{ recommendationSet["medium"][0] }} items
+              per set and {{ recommendationSet["medium"][1] }} recommendation
+              groups, Fast</span
+            >
+          </label>
+        </p>
+      </div>
+      <div>
+        <p>
+          <label>
+            <input
+              class="mr-2"
+              type="radio"
+              name="clusterSize"
+              value="small"
+              v-model="clusterSize"
+            />Small
+            <span class="text-muted font-italic ml-2"
+              >This will result in {{ recommendationSet["small"][0] }} items per
+              set and {{ recommendationSet["small"][1] }} recommendation groups,
+              <b>Slow</b></span
+            ></label
+          >
+        </p>
+      </div>
+      <div
+        class="alert alert-danger"
+        role="alert"
+        v-if="clusterSize === 'small' && this.techniques === 'spacy'"
+      >
+        This will take a lot of time...
       </div>
       <button @click="start" class="btn btn-primary">Start</button>
     </div>
@@ -205,6 +254,8 @@ export default {
       language: "",
       originalLanguage: "",
       techniques: "",
+      clusterSize: "",
+      recommendationSet: "",
       showWarning: true,
       validated: false
     };
@@ -219,6 +270,8 @@ export default {
       this.originalLanguage = result["language"];
       this.language = result["language"];
       this.filename = result["filename"];
+      this.clusterSize = "medium";
+      this.recommendationSet = result["recommendationSet"];
     },
     start() {
       this.validated = true;
@@ -226,7 +279,8 @@ export default {
         this.pickedContent === "" ||
         this.pickedDisplay === "" ||
         this.language === "" ||
-        this.techniques === ""
+        this.techniques === "" ||
+        this.clusterSize === ""
       ) {
         return;
       }
@@ -241,7 +295,8 @@ export default {
         content: this.pickedContent,
         filename: this.filename,
         language: this.language,
-        techniques: this.techniques
+        techniques: this.techniques,
+        clusterSize: this.clusterSize
       });
       this.$emit("finished");
     },
