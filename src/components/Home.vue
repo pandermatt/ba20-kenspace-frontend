@@ -194,54 +194,58 @@
               Your selection has no result.
             </div>
           </div>
-          <div
-            class="card content-card"
-            v-for="(item, idx) in queriesData.slice(0, queryLimit)"
-            v-bind:key="idx"
-          >
+          <transition-group name="flip-list" tag="div">
             <div
-              class="show-similar"
-              v-bind:class="{ active: similarActive }"
-              v-on:click="sortSimilarObjects(item.cluster_id)"
+              class="card content-card"
+              v-for="(item, idx) in queriesData.slice(0, queryLimit)"
+              v-bind:key="idx"
             >
-              <div v-if="!similarActive">
-                <i class="fas fa-greater-than-equal"></i> show similar records
+              <div
+                class="show-similar"
+                v-bind:class="{ active: similarActive }"
+                v-on:click="sortSimilarObjects(item.cluster_id)"
+              >
+                <div v-if="!similarActive">
+                  <i class="fas fa-greater-than-equal"></i> show similar records
+                </div>
+                <div v-if="similarActive">
+                  <i class="fas fa-less-than-equal"></i> show all records
+                </div>
               </div>
-              <div v-if="similarActive">
-                <i class="fas fa-less-than-equal"></i> show all records
+              <div class="card-header" v-if="item.meta_info.image">
+                <img :src="item.meta_info.image" alt="Movie Cover" />
+              </div>
+              <div
+                class="card-body"
+                v-bind:class="{ 'card-body-with-image': item.meta_info.image }"
+              >
+                <h5 class="card-title card-title-similar">{{ item.text }}</h5>
+                <p class="small">{{ item.meta_info.content }}</p>
+                <div>
+                  <span
+                    v-for="(content, idx) in item.data"
+                    v-bind:key="idx"
+                    v-on:click="addFilter(content, false)"
+                    class="badge badge-pill badge-secondary mr-1 cursor-pointer"
+                    >{{ content }}
+                  </span>
+                </div>
+              </div>
+              <div
+                class="card-footer"
+                v-bind:class="{
+                  'card-footer-with-image': item.meta_info.image
+                }"
+                v-if="queriesData.length !== originalQueriesData.length"
+              >
+                <FeedbackButtons
+                  :submitted="false"
+                  v-on:up="shareFeedback('yes', item.text)"
+                  v-on:down="shareFeedback('no', item.text)"
+                />
               </div>
             </div>
-            <div class="card-header" v-if="item.meta_info.image">
-              <img :src="item.meta_info.image" alt="Movie Cover" />
-            </div>
-            <div
-              class="card-body"
-              v-bind:class="{ 'card-body-with-image': item.meta_info.image }"
-            >
-              <h5 class="card-title card-title-similar">{{ item.text }}</h5>
-              <p class="small">{{ item.meta_info.content }}</p>
-              <div>
-                <span
-                  v-for="(content, idx) in item.data"
-                  v-bind:key="idx"
-                  v-on:click="addFilter(content, false)"
-                  class="badge badge-pill badge-secondary mr-1 cursor-pointer"
-                  >{{ content }}
-                </span>
-              </div>
-            </div>
-            <div
-              class="card-footer"
-              v-bind:class="{ 'card-footer-with-image': item.meta_info.image }"
-              v-if="queriesData.length !== originalQueriesData.length"
-            >
-              <FeedbackButtons
-                :submitted="false"
-                v-on:up="shareFeedback('yes', item.text)"
-                v-on:down="shareFeedback('no', item.text)"
-              />
-            </div>
-          </div>
+          </transition-group>
           <button
             type="button"
             class="btn btn-light w-100"
@@ -1084,5 +1088,18 @@ export default {
 .search-bar {
   display: inline-block;
   width: 70%;
+}
+
+.flip-list-move {
+  transition: transform 0.5s;
+}
+
+.flip-list-enter-active,
+.flip-list-leave-active {
+  transition: opacity 0.3s ease;
+}
+.flip-list-enter,
+.flip-list-leave-to {
+  opacity: 0;
 }
 </style>
