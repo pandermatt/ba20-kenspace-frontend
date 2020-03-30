@@ -24,6 +24,7 @@
         id="dropzone"
         :options="dropzoneOptions"
         @vdropzone-complete="afterComplete"
+        @vdropzone-error="failed"
       ></vue-dropzone>
       <button @click="removeFile" class="btn btn-danger mt-2 mb-2">
         Remove All Files
@@ -41,7 +42,7 @@
         <tbody>
           <tr v-for="(c, idx) in cols" v-bind:key="idx">
             <td>
-              <label>
+              <label class="upload-label">
                 <input
                   class="mr-2"
                   type="radio"
@@ -52,7 +53,7 @@
               </label>
             </td>
             <td>
-              <label>
+              <label class="upload-label">
                 <input
                   class="mr-2"
                   type="radio"
@@ -65,8 +66,6 @@
           </tr>
         </tbody>
       </table>
-      <p><b>Display Text:</b> {{ pickedDisplay }}</p>
-      <p><b>Content:</b> {{ pickedContent }}</p>
       <div
         class="alert alert-danger"
         role="alert"
@@ -75,9 +74,13 @@
         Select columns to analyse
       </div>
       <h3 class="mt-4 mb-2">Data Language</h3>
+      <p class="font-italic">
+        The language of your data looks like
+        <span class="upload-label">{{ originalLanguage }}</span>
+      </p>
       <div v-for="(c, idx) in ['german', 'english']" v-bind:key="idx">
         <p>
-          <label>
+          <label class="upload-label">
             <input
               class="mr-2"
               type="radio"
@@ -85,6 +88,20 @@
               :value="c"
               v-model="language"
             />{{ c }}
+          </label>
+        </p>
+      </div>
+      <div v-if="!['german', 'english'].includes(originalLanguage)">
+        <p>
+          <label class="upload-label">
+            <input
+              v-on:click="techniques = 'auto'"
+              class="mr-2"
+              type="radio"
+              name="language"
+              :value="originalLanguage"
+              v-model="language"
+            />{{ originalLanguage }}
           </label>
         </p>
       </div>
@@ -103,11 +120,26 @@
               class="mr-2"
               type="radio"
               name="techniques"
-              :value="nltk"
+              value="auto"
               v-model="techniques"
+            />Choose automatically
+            <span class="text-muted font-italic ml-2">Fastest</span>
+          </label>
+        </p>
+      </div>
+      <div>
+        <p>
+          <label>
+            <input
+              class="mr-2"
+              type="radio"
+              name="techniques"
+              value="nltk"
+              v-model="techniques"
+              :disabled="!['german', 'english'].includes(language)"
             />NLTK
             <span class="text-muted font-italic ml-2"
-              >Analyse Text based on Language Features, Faster</span
+              >Analyse Text based on Language Features, Fast</span
             >
           </label>
         </p>
@@ -119,11 +151,12 @@
               class="mr-2"
               type="radio"
               name="techniques"
-              :value="spacy"
+              value="spacy"
               v-model="techniques"
+              :disabled="!['german', 'english'].includes(language)"
             />SpaCy
             <span class="text-muted font-italic ml-2"
-              >Analyse Text based on Connections, Slower</span
+              >Analyse Text based on Connections, <b>Slow</b></span
             >
           </label>
         </p>
@@ -134,6 +167,14 @@
         v-if="techniques === '' && validated"
       >
         Select Language Analysis Techniques
+      </div>
+      <div
+        class="alert alert-warning"
+        role="alert"
+        v-if="!['german', 'english'].includes(language)"
+      >
+        <span class="upload-label">{{ language }}</span> does not support
+        user-defined "Language Analysis Techniques"
       </div>
       <button @click="start" class="btn btn-primary">Start</button>
     </div>
@@ -162,6 +203,7 @@ export default {
       pickedContent: "",
       filename: "",
       language: "",
+      originalLanguage: "",
       techniques: "",
       showWarning: true,
       validated: false
@@ -171,6 +213,11 @@ export default {
     afterComplete(file) {
       let result = JSON.parse(file.xhr.response);
       this.cols = result["cols"];
+      this.techniques = "auto";
+      this.pickedDisplay = "";
+      this.pickedContent = "";
+      this.originalLanguage = result["language"];
+      this.language = result["language"];
       this.filename = result["filename"];
     },
     start() {
@@ -184,6 +231,11 @@ export default {
         return;
       }
 
+      // AUTO -> NLTK
+      if (this.techniques === "auto") {
+        this.techniques = "nltk";
+      }
+
       localStorage.settings = JSON.stringify({
         display: this.pickedDisplay,
         content: this.pickedContent,
@@ -193,6 +245,12 @@ export default {
       });
       this.$emit("finished");
     },
+    failed(file) {
+      const message = JSON.parse(file.xhr.response).message;
+      const elements = document.querySelectorAll(".dz-error-message span");
+      const lastElement = elements[elements.length - 1];
+      lastElement.textContent = message;
+    },
     removeFile() {
       this.cols = null;
       this.$refs.myVueDropzone.removeAllFiles();
@@ -200,3 +258,8 @@ export default {
   }
 };
 </script>
+<style scoped lang="scss">
+.upload-label {
+  text-transform: capitalize;
+}
+</style>
