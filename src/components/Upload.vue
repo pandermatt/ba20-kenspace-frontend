@@ -70,11 +70,11 @@
       <div
         class="alert alert-danger"
         role="alert"
-        v-if="this.pickedContent === '' || this.pickedDisplay === ''"
+        v-if="(pickedContent === '' || pickedDisplay === '') && validated"
       >
         Select columns to analyse
       </div>
-      <h3 class="mt-2 mb-2">Data Language</h3>
+      <h3 class="mt-4 mb-2">Data Language</h3>
       <div v-for="(c, idx) in ['german', 'english']" v-bind:key="idx">
         <p>
           <label>
@@ -88,8 +88,52 @@
           </label>
         </p>
       </div>
-      <div class="alert alert-danger" role="alert" v-if="this.language === ''">
+      <div
+        class="alert alert-danger"
+        role="alert"
+        v-if="language === '' && validated"
+      >
         Select language
+      </div>
+      <h3 class="mt-4 mb-2">Language Analysis Techniques</h3>
+      <div>
+        <p>
+          <label>
+            <input
+              class="mr-2"
+              type="radio"
+              name="techniques"
+              :value="nltk"
+              v-model="techniques"
+            />NLTK
+            <span class="text-muted font-italic ml-2"
+              >Analyse Text based on Language Features, Faster</span
+            >
+          </label>
+        </p>
+      </div>
+      <div>
+        <p>
+          <label>
+            <input
+              class="mr-2"
+              type="radio"
+              name="techniques"
+              :value="spacy"
+              v-model="techniques"
+            />SpaCy
+            <span class="text-muted font-italic ml-2"
+              >Analyse Text based on Connections, Slower</span
+            >
+          </label>
+        </p>
+      </div>
+      <div
+        class="alert alert-danger"
+        role="alert"
+        v-if="techniques === '' && validated"
+      >
+        Select Language Analysis Techniques
       </div>
       <button @click="start" class="btn btn-primary">Start</button>
     </div>
@@ -118,7 +162,9 @@ export default {
       pickedContent: "",
       filename: "",
       language: "",
-      showWarning: true
+      techniques: "",
+      showWarning: true,
+      validated: false
     };
   },
   methods: {
@@ -128,10 +174,12 @@ export default {
       this.filename = result["filename"];
     },
     start() {
+      this.validated = true;
       if (
         this.pickedContent === "" ||
         this.pickedDisplay === "" ||
-        this.language === ""
+        this.language === "" ||
+        this.techniques === ""
       ) {
         return;
       }
@@ -140,7 +188,8 @@ export default {
         display: this.pickedDisplay,
         content: this.pickedContent,
         filename: this.filename,
-        language: this.language
+        language: this.language,
+        techniques: this.techniques
       });
       this.$emit("finished");
     },
