@@ -41,16 +41,16 @@
           <i class="fab fa-searchengin fa-3x" style="color: #D53032"></i>
           <h5 class="font-weight-bold my-4">Explore your data</h5>
           <p class="text-muted mb-md-0 mb-5">
-            KenSpace automatically indexes your search and generates keywords so
-            you can get an overview of your data.
+            KenSpace automatically indexes your search and generates keywords,
+            so you can get the most out of your data.
           </p>
         </div>
         <div class="col-md-4">
           <i class="fas fa-object-group fa-3x" style="color: #FFB800"></i>
           <h5 class="font-weight-bold my-4">Group similar data</h5>
           <p class="text-muted mb-md-0 mb-5">
-            Due to different grouping mechanisms KenSpace will group your data
-            for you.
+            Due to different grouping mechanisms KenSpace will group similar for
+            you.
           </p>
         </div>
         <div class="col-md-4">

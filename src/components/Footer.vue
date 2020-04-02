@@ -23,7 +23,14 @@
           <div class="row">
             <div class="col-sm">
               <h1>KenSpace</h1>
-              <div v-if="apiKey">
+              <span
+                ><i class="ri-upload-cloud-line remix-icon"></i> Upload.
+              </span>
+              <span
+                ><i class="ri-sound-module-line remix-icon"></i> Customize.
+              </span>
+              <span><i class="ri-compass-line remix-icon"></i> Discover. </span>
+              <div class="mt-3" v-if="apiKey">
                 <p><b>Your Token:</b> {{ apiKey }}</p>
                 <p><b>Model UUID:</b> {{ modelUuid }}</p>
               </div>
@@ -83,5 +90,10 @@ footer {
 .wave {
   position: relative;
   top: 10px;
+}
+
+.remix-icon {
+  position: relative;
+  top: 2px;
 }
 </style>
