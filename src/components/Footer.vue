@@ -30,8 +30,18 @@
             </div>
             <div class="col-sm">
               <p class="author">
-                Pascal Andermatt<br />
-                Stefan Brunner
+                Pascal Andermatt <br />
+                <a target="_blank" href="https://www.linkedin.com/in/pandermatt"
+                  ><i class="fab fa-linkedin"></i
+                ></a>
+                <a target="_blank" href="https://github.com/pandermatt"
+                  ><i class="fab fa-github ml-1"></i
+                ></a>
+                <br />
+                Stefan Brunner <br />
+                <a target="_blank" href="https://github.com/thecoder95"
+                  ><i class="fab fa-github ml-1"></i
+                ></a>
               </p>
             </div>
           </div>
@@ -58,6 +68,12 @@ footer {
   padding: 100px 0;
 
   .author {
+    a {
+      color: white;
+      &:hover {
+        color: #1be7ff;
+      }
+    }
     @media (min-width: 576px) {
       text-align: right;
     }
