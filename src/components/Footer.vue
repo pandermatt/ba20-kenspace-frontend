@@ -23,15 +23,32 @@
           <div class="row">
             <div class="col-sm">
               <h1>KenSpace</h1>
-              <div v-if="apiKey">
+              <span
+                ><i class="ri-upload-cloud-line remix-icon"></i> Upload.
+              </span>
+              <span
+                ><i class="ri-sound-module-line remix-icon"></i> Customize.
+              </span>
+              <span><i class="ri-compass-line remix-icon"></i> Discover. </span>
+              <div class="mt-3" v-if="apiKey">
                 <p><b>Your Token:</b> {{ apiKey }}</p>
                 <p><b>Model UUID:</b> {{ modelUuid }}</p>
               </div>
             </div>
             <div class="col-sm">
               <p class="author">
-                Pascal Andermatt<br />
-                Stefan Brunner
+                Pascal Andermatt <br />
+                <a target="_blank" href="https://www.linkedin.com/in/pandermatt"
+                  ><i class="fab fa-linkedin"></i
+                ></a>
+                <a target="_blank" href="https://github.com/pandermatt"
+                  ><i class="fab fa-github ml-1"></i
+                ></a>
+                <br />
+                Stefan Brunner <br />
+                <a target="_blank" href="https://github.com/thecoder95"
+                  ><i class="fab fa-github ml-1"></i
+                ></a>
               </p>
             </div>
           </div>
@@ -58,6 +75,12 @@ footer {
   padding: 100px 0;
 
   .author {
+    a {
+      color: white;
+      &:hover {
+        color: #1be7ff;
+      }
+    }
     @media (min-width: 576px) {
       text-align: right;
     }
@@ -67,5 +90,10 @@ footer {
 .wave {
   position: relative;
   top: 10px;
+}
+
+.remix-icon {
+  position: relative;
+  top: 2px;
 }
 </style>
