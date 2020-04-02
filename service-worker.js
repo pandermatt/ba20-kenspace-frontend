@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/precache-manifest.9c4af0fbc9023cce223f7adb42b3e49d.js"
+  "/precache-manifest.6b306b468078a401ca9e00bbeb34f5b9.js"
 );
 
 workbox.core.setCacheNameDetails({prefix: "ba20-kenspace-frontend"});
