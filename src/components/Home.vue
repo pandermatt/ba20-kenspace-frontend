@@ -1,12 +1,13 @@
 <template>
   <div>
-    <div class="header-container">
+    <LandingPage v-if="!apiKey" v-on:popupClick="login" />
+    <div class="header-container" v-if="apiKey">
       <div class="container">
         <h1>
-          <b class="logo">KenSpace</b>
-          <span class="badge badge-secondary">Beta</span>
+          <span class="logo font-weight-bold">KenSpace </span>
+          <span class="font-italic">Beta</span>
         </h1>
-        <div v-if="apiKey">
+        <div>
           <p>
             <b>Hello!</b>&nbsp;
             <button v-on:click="logout" class="link-style">logout</button>
@@ -77,18 +78,6 @@
             </div>
           </div>
         </div>
-      </div>
-    </div>
-    <div class="container login-page" v-if="!apiKey">
-      <div class="jumbotron home-box">
-        <h1 class="display-4">Sorry!</h1>
-        <p class="lead">
-          This page is currently only accessible for registered beta users.
-        </p>
-        <hr class="my-4" />
-        <button v-on:click="login" class="link-style">
-          Click here if you have received a beta key
-        </button>
       </div>
     </div>
     <Upload v-if="apiKey && upload" v-on:finished="loadContent" />
@@ -267,10 +256,18 @@ import Loading from "./Loading";
 import ProgressBar from "./ProgressBar";
 import FeedbackButtons from "./FeedbackButtons";
 import Upload from "./Upload";
+import LandingPage from "./LandingPage";
 
 export default {
   name: "Home",
-  components: { Upload, FeedbackButtons, ProgressBar, Loading, Footer },
+  components: {
+    LandingPage,
+    Upload,
+    FeedbackButtons,
+    ProgressBar,
+    Loading,
+    Footer
+  },
   props: {
     msg: String
   },
@@ -768,7 +765,6 @@ export default {
 }
 
 .logo {
-  color: $main-blue;
   font-size: 50px;
 }
 
@@ -866,10 +862,6 @@ export default {
   -ms-transform: translateY(-8px) rotate(90deg);
   -o-transform: translateY(-8px) rotate(90deg);
   transform: translateY(-8px) rotate(90deg);
-}
-
-.login-page {
-  min-height: 35vh;
 }
 
 .content-card {
