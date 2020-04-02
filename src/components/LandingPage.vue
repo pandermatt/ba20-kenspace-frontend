@@ -54,7 +54,7 @@
           </p>
         </div>
         <div class="col-md-4">
-          <i class="fas fa-lock fa-3x" style="color: #1BE7FF"></i>
+          <i class="fas fa-lock fa-3x" style="color: #3ed935"></i>
           <h5 class="font-weight-bold my-4">Control your data</h5>
           <p class="grey-text mb-0">
             KenSpace will never store any user based settings. Your data will
