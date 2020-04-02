@@ -49,15 +49,15 @@
           <i class="fas fa-object-group fa-3x" style="color: #FFB800"></i>
           <h5 class="font-weight-bold my-4">Group similar data</h5>
           <p class="text-muted mb-md-0 mb-5">
-            Due to different grouping mechanisms KenSpace will group similar for
-            you.
+            Due to different grouping mechanisms, KenSpace will group similar
+            for you.
           </p>
         </div>
         <div class="col-md-4">
           <i class="fas fa-lock fa-3x" style="color: #3ed935"></i>
           <h5 class="font-weight-bold my-4">Control your data</h5>
-          <p class="grey-text mb-0">
-            KenSpace will never store any user based settings. Your data will
+          <p class="text-muted mb-md-0 mb-5">
+            KenSpace will never store any user-based settings. Your data will
             never be passed on to others.
           </p>
         </div>
