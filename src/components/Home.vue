@@ -187,7 +187,7 @@
             <div
               class="card content-card"
               v-for="(item, idx) in queriesData.slice(0, queryLimit)"
-              v-bind:key="idx"
+              v-bind:key="idx + 0"
             >
               <div
                 class="show-similar"
