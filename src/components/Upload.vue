@@ -242,7 +242,7 @@ export default {
     return {
       dropzoneOptions: {
         url: `${process.env.VUE_APP_BACKEND_URL}/upload/`,
-        acceptedFiles: "text/csv",
+        acceptedFiles: "text/csv,text/plain",
         maxFiles: 1,
         maxFilesize: 20,
         headers: { Authorization: `Bearer ${localStorage.apiKey}` }
