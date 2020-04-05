@@ -379,7 +379,7 @@ export default {
     prepareUpload() {
       this.dropzoneOptions = {
         url: `${process.env.VUE_APP_BACKEND_URL}/upload/`,
-        acceptedFiles: "text/*",
+        acceptedFiles: ".csv, application/vnd.ms-excel, text/*",
         maxFiles: 1,
         maxFilesize: 20,
         params: { uploadType: this.selectedUploadData },
