@@ -23,7 +23,7 @@
           <button v-on:click="resetApp" class="link-style">
             reset & generate new model
           </button>
-          <div class="row">
+          <div class="row" v-if="!upload">
             <div class="col-md-6">
               <div class="display-filter">
                 <b>picked</b> <span v-if="filterByList.length === 0">none</span>
@@ -187,7 +187,7 @@
             <div
               class="card content-card"
               v-for="(item, idx) in queriesData.slice(0, queryLimit)"
-              v-bind:key="idx"
+              v-bind:key="idx + 0"
             >
               <div
                 class="show-similar"
