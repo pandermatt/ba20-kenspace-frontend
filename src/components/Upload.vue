@@ -17,7 +17,7 @@
           v-bind:class="{ selected: selectedUploadData === 'txt' }"
           v-on:click="selectedUploadData = 'txt'"
         >
-          <p><i class="fas fa-5x fa-file-word"></i></p>
+          <p><i class="fas fa-5x fa-file-alt"></i></p>
           <p>Text File</p>
           <div class="small">Plain text without structure</div>
         </div>
@@ -53,12 +53,12 @@
       <h1>Upload your data</h1>
       <div class="alert alert-warning mt-2 mb-2" role="alert">
         <h1 v-if="showWarning"><b>Beta</b> Warning!</h1>
-        <p>
+        <div>
           This app is currently in a beta phase. Your data will be uploaded
           directly to the server. If you do not want to share your data or if
           you do not have the rights to the data,
           <b>DO NOT</b> upload it.
-        </p>
+        </div>
         <button
           v-if="showWarning"
           v-on:click="showWarning = false"
@@ -74,7 +74,7 @@
             ><i class="fas fa-file-csv"></i> CSV File</span
           >
           <span v-if="selectedUploadData === 'txt'"
-            ><i class="fas fa-file-word"></i> Text File</span
+            ><i class="fas fa-file-alt"></i> Text File</span
           >
           <span v-if="selectedUploadData === 'whatsapp'"
             ><i class="fab fa-whatsapp"></i> WhatsApp Data Export</span
