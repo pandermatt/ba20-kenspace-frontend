@@ -101,6 +101,9 @@
         <button @click="removeFile" class="btn btn-danger mt-2 mb-2">
           Remove All Files
         </button>
+        <p class="text-muted float-right">
+          Accepted Files: {{ dropzoneOptions.acceptedFiles }}
+        </p>
       </div>
 
       <div v-if="cols">
@@ -385,15 +388,29 @@ export default {
       this.dataSourceSelected = false;
     },
     prepareUpload() {
+      let acceptedFiles = "";
+      let fileSize = 20;
+      if (this.selectedUploadData === "csv") {
+        acceptedFiles = ".csv, application/vnd.ms-excel";
+      } else if (
+        this.selectedUploadData === "txt" ||
+        this.selectedUploadData === "whatsapp"
+      ) {
+        acceptedFiles = "text/*";
+      } else if (this.selectedUploadData === "zip") {
+        acceptedFiles =
+          "application/zip, application/x-zip-compressed, multipart/x-zip, .zip";
+      }
+
       this.dropzoneOptions = {
         url: `${process.env.VUE_APP_BACKEND_URL}/upload/`,
-        acceptedFiles: ".csv, application/vnd.ms-excel, text/*",
+        acceptedFiles: acceptedFiles,
         maxFiles: 1,
-        maxFilesize: 20,
+        maxFilesize: fileSize,
+        timeout: 180000,
         params: { uploadType: this.selectedUploadData },
         headers: { Authorization: `Bearer ${localStorage.apiKey}` }
       };
-      console.log(this.dropzoneOptions);
       this.dataSourceSelected = true;
     }
   }
