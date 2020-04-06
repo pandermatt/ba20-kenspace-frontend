@@ -30,10 +30,14 @@
           <p>WhatsApp Data Export</p>
           <p class="small">Exported WhatsApp Chat as txt</p>
         </div>
-        <div class="col-sm data-source-icon">
+        <div
+          class="col-sm data-source-icon"
+          v-bind:class="{ selected: selectedUploadData === 'zip' }"
+          v-on:click="selectedUploadData = 'zip'"
+        >
           <p><i class="fas fa-5x fa-file-archive"></i></p>
           <p>Zip File</p>
-          <p class="coming-soon">Coming Soon</p>
+          <p class="small">Zip File containing txt or csv files</p>
         </div>
         <div class="col-sm data-source-icon">
           <p><i class="fas fa-5x fa-server"></i></p>
@@ -78,7 +82,11 @@
           >
           <span v-if="selectedUploadData === 'whatsapp'"
             ><i class="fab fa-whatsapp"></i> WhatsApp Data Export</span
-          >.
+          >
+          <span v-if="selectedUploadData === 'zip'"
+            ><i class="fas fa-file-archive"></i> Zip File</span
+          >
+          .
           <button v-on:click="resetUpload" class="link-style ml-2">
             Change Data Source
           </button>
