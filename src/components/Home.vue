@@ -208,7 +208,26 @@
                 class="card-body"
                 v-bind:class="{ 'card-body-with-image': item.meta_info.image }"
               >
-                <h5 class="card-title card-title-similar">{{ item.text }}</h5>
+                <h5 class="card-title card-title-similar">
+                  {{ item.text }}
+                  <span
+                    class="badge badge-light"
+                    v-if="item.meta_info.release_date"
+                    >{{ item.meta_info.release_date }}</span
+                  >
+                  <span
+                    class="ml-2 badge badge-light"
+                    v-if="item.meta_info.rating"
+                  >
+                    <span
+                      v-for="(_, idx) in item.meta_info.rating"
+                      v-bind:key="idx"
+                    >
+                      <i class="far fa-star"></i>
+                    </span>
+                  </span>
+                </h5>
+
                 <p class="small">{{ item.meta_info.content }}</p>
                 <div>
                   <span
@@ -622,6 +641,7 @@ export default {
       const Swal = require("sweetalert2");
       Swal.fire({
         title: "Generating new Cluster",
+        text: "This will take a few minutes...",
         onBeforeOpen: () => {
           Swal.showLoading();
           this.queriesData = [];
@@ -1090,6 +1110,7 @@ export default {
 .flip-list-leave-active {
   transition: opacity 0.3s ease;
 }
+
 .flip-list-enter,
 .flip-list-leave-to {
   opacity: 0;

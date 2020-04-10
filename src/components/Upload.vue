@@ -30,10 +30,14 @@
           <p>WhatsApp Data Export</p>
           <p class="small">Exported WhatsApp Chat as txt</p>
         </div>
-        <div class="col-sm data-source-icon">
+        <div
+          class="col-sm data-source-icon"
+          v-bind:class="{ selected: selectedUploadData === 'zip' }"
+          v-on:click="selectedUploadData = 'zip'"
+        >
           <p><i class="fas fa-5x fa-file-archive"></i></p>
           <p>Zip File</p>
-          <p class="coming-soon">Coming Soon</p>
+          <p class="small">Zip File containing txt or csv files</p>
         </div>
         <div class="col-sm data-source-icon">
           <p><i class="fas fa-5x fa-server"></i></p>
@@ -78,7 +82,11 @@
           >
           <span v-if="selectedUploadData === 'whatsapp'"
             ><i class="fab fa-whatsapp"></i> WhatsApp Data Export</span
-          >.
+          >
+          <span v-if="selectedUploadData === 'zip'"
+            ><i class="fas fa-file-archive"></i> Zip File</span
+          >
+          .
           <button v-on:click="resetUpload" class="link-style ml-2">
             Change Data Source
           </button>
@@ -93,6 +101,9 @@
         <button @click="removeFile" class="btn btn-danger mt-2 mb-2">
           Remove All Files
         </button>
+        <p class="text-muted float-right">
+          Accepted Files: {{ dropzoneOptions.acceptedFiles }}
+        </p>
       </div>
 
       <div v-if="cols">
@@ -377,15 +388,29 @@ export default {
       this.dataSourceSelected = false;
     },
     prepareUpload() {
+      let acceptedFiles = "";
+      let fileSize = 20;
+      if (this.selectedUploadData === "csv") {
+        acceptedFiles = ".csv, application/vnd.ms-excel";
+      } else if (
+        this.selectedUploadData === "txt" ||
+        this.selectedUploadData === "whatsapp"
+      ) {
+        acceptedFiles = "text/*";
+      } else if (this.selectedUploadData === "zip") {
+        acceptedFiles =
+          "application/zip, application/x-zip-compressed, multipart/x-zip, .zip";
+      }
+
       this.dropzoneOptions = {
         url: `${process.env.VUE_APP_BACKEND_URL}/upload/`,
-        acceptedFiles: ".csv, application/vnd.ms-excel, text/*",
+        acceptedFiles: acceptedFiles,
         maxFiles: 1,
-        maxFilesize: 20,
+        maxFilesize: fileSize,
+        timeout: 180000,
         params: { uploadType: this.selectedUploadData },
         headers: { Authorization: `Bearer ${localStorage.apiKey}` }
       };
-      console.log(this.dropzoneOptions);
       this.dataSourceSelected = true;
     }
   }
