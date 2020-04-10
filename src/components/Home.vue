@@ -641,6 +641,7 @@ export default {
       const Swal = require("sweetalert2");
       Swal.fire({
         title: "Generating new Cluster",
+        text: "This will take a few minutes...",
         onBeforeOpen: () => {
           Swal.showLoading();
           this.queriesData = [];
