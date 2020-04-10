@@ -340,20 +340,20 @@
         <p><b>Fast</b>: A data set generation can take up to 2 minutes.</p>
         <p><b>Average</b>: A data set generation can take up to 7 minutes.</p>
         <p><b>Slow</b>: A data set generation can take up to 15 minutes.</p>
-        <VueSvgGauge
-          :start-angle="-110"
-          :end-angle="110"
-          :value="performance"
-          :separator-step="2"
-          :scale-interval="1"
-          :inner-radius="80"
-          :max="6"
-          easing="Bounce.Out"
-        >
-          <div class="inner-text">
-            <span>{{ performanceMessage }}</span>
-          </div>
-        </VueSvgGauge>
+        <div class="gauge-box">
+          <VueSvgGauge
+            :start-angle="-110"
+            :end-angle="110"
+            :value="performance"
+            :separator-step="2"
+            :scale-interval="1"
+            :inner-radius="80"
+            :max="6"
+            easing="Bounce.Out"
+          >
+          </VueSvgGauge>
+          <span>{{ performanceMessage }}</span>
+        </div>
         <div
           class="alert alert-danger"
           role="alert"
@@ -577,22 +577,19 @@ export default {
   }
 }
 
-.gauge {
+.gauge-box {
   max-width: 300px;
   margin: auto;
   padding: 20px 0;
+  position: relative;
 
-  .inner-text {
-    height: 100%;
-    width: 100%;
-
-    span {
-      text-align: center;
-      position: absolute;
-      top: 70px;
-      width: 100px;
-      left: 50px;
-    }
+  span {
+    position: absolute;
+    top: 120px;
+    left: 51px;
+    width: 200px;
+    text-align: center;
+    font-size: 40px;
   }
 }
 </style>
