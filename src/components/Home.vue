@@ -35,10 +35,7 @@
                     class="badge badge-dark mr-1 cursor-pointer"
                     style="padding-right: 20px;"
                     >{{ value }}
-                    <i
-                      class="ri-close-circle-line"
-                      style="position: absolute;padding-left: 5px;"
-                    ></i>
+                    <i class="ri-close-circle-line remove-icon-position"></i>
                   </span>
                 </transition-group>
               </div>
@@ -52,10 +49,7 @@
                     style="padding-right: 20px;"
                     v-on:click="removeDeleted(value)"
                     >{{ value }}
-                    <i
-                      class="ri-close-circle-line"
-                      style="position: absolute;padding-left: 5px;"
-                    ></i>
+                    <i class="ri-close-circle-line remove-icon-position"></i>
                   </span>
                 </transition-group>
               </div>
@@ -106,6 +100,15 @@
               ></i>
             </button>
           </h3>
+          <div
+            class="sidebar-card mb-3"
+            v-if="Object.keys(facetData).length !== 0"
+          >
+            <FacetWordCloud
+              :default-words="cloudWords"
+              v-on:wordClicked="toggleFilter"
+            ></FacetWordCloud>
+          </div>
           <div class="sidebar-card">
             <div v-if="Object.keys(facetData).length === 0">
               <Loading></Loading>
@@ -195,7 +198,8 @@
                 v-on:click="sortSimilarObjects(item.cluster_id)"
               >
                 <div v-if="!similarActive">
-                  <i class="fas fa-greater-than-equal"></i> show similar records
+                  <i class="fas fa-greater-than-equal"></i> show
+                  {{ clusterMap[item.cluster_id] }} similar records
                 </div>
                 <div v-if="similarActive">
                   <i class="fas fa-less-than-equal"></i> show all records
@@ -223,7 +227,7 @@
                       v-for="(_, idx) in item.meta_info.rating"
                       v-bind:key="idx"
                     >
-                      <i class="far fa-star"></i>
+                      <i class="fas fa-star star-rating-color"></i>
                     </span>
                   </span>
                 </h5>
@@ -270,12 +274,13 @@
 </template>
 
 <script>
+import FacetWordCloud from "./FacetWordCloud";
+import FeedbackButtons from "./FeedbackButtons";
 import Footer from "./Footer";
+import LandingPage from "./LandingPage";
 import Loading from "./Loading";
 import ProgressBar from "./ProgressBar";
-import FeedbackButtons from "./FeedbackButtons";
 import Upload from "./Upload";
-import LandingPage from "./LandingPage";
 
 export default {
   name: "Home",
@@ -285,7 +290,8 @@ export default {
     FeedbackButtons,
     ProgressBar,
     Loading,
-    Footer
+    Footer,
+    FacetWordCloud
   },
   props: {
     msg: String
@@ -311,7 +317,9 @@ export default {
       similarActive: false,
       currentClusterId: null,
       upload: false,
-      removeFilterFunc: null
+      removeFilterFunc: null,
+      cloudWords: [],
+      clusterMap: []
     };
   },
   computed: {
@@ -503,9 +511,18 @@ export default {
       let facet = {};
       let facetClusterNumber = {};
 
+      let clusterMap = {};
+
       for (let i = 0; i < obj.length; i++) {
         let clusterData = obj[i].data;
         let clusterId = obj[i].cluster_id;
+
+        if (clusterId in clusterMap) {
+          clusterMap[clusterId]++;
+        } else {
+          clusterMap[clusterId] = 1;
+        }
+
         for (let j = 0; j < clusterData.length; j++) {
           if (clusterData[j] in facet) {
             facet[clusterData[j]]++;
@@ -519,12 +536,24 @@ export default {
         }
       }
 
+      this.clusterMap = clusterMap;
+
       this.facetClusterNumber = facetClusterNumber;
       let keys = Object.keys(facet);
       let results = this.queriesData.length;
       this.tagsSameAsResult = keys.every(val => facet[val] === results);
 
       this.facetData = this.sortObject(facet);
+
+      let sortedKeys = Object.keys(this.facetData);
+      let words = [];
+      for (let i = 0; i < 150; i++) {
+        words.push({
+          name: sortedKeys[i],
+          value: facet[sortedKeys[i]]
+        });
+      }
+      this.cloudWords = words;
     },
     changeSort: function() {
       this.sortABC = !this.sortABC;
@@ -1043,7 +1072,7 @@ export default {
   }
 
   text-align: center;
-  width: 200px;
+  width: 230px;
   padding: 5px 10px;
   border-radius: 0 3px 0 3px;
 }
@@ -1114,5 +1143,14 @@ export default {
 .flip-list-enter,
 .flip-list-leave-to {
   opacity: 0;
+}
+
+.star-rating-color {
+  color: #ff9529;
+}
+
+.remove-icon-position {
+  position: absolute;
+  padding-left: 5px;
 }
 </style>
