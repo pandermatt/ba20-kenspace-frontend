@@ -35,10 +35,7 @@
                     class="badge badge-dark mr-1 cursor-pointer"
                     style="padding-right: 20px;"
                     >{{ value }}
-                    <i
-                      class="ri-close-circle-line"
-                      style="position: absolute;padding-left: 5px;"
-                    ></i>
+                    <i class="ri-close-circle-line remove-icon-position"></i>
                   </span>
                 </transition-group>
               </div>
@@ -52,10 +49,7 @@
                     style="padding-right: 20px;"
                     v-on:click="removeDeleted(value)"
                     >{{ value }}
-                    <i
-                      class="ri-close-circle-line"
-                      style="position: absolute;padding-left: 5px;"
-                    ></i>
+                    <i class="ri-close-circle-line remove-icon-position"></i>
                   </span>
                 </transition-group>
               </div>
@@ -223,7 +217,7 @@
                       v-for="(_, idx) in item.meta_info.rating"
                       v-bind:key="idx"
                     >
-                      <i class="far fa-star"></i>
+                      <i class="fas fa-star star-rating-color"></i>
                     </span>
                   </span>
                 </h5>
@@ -1114,5 +1108,14 @@ export default {
 .flip-list-enter,
 .flip-list-leave-to {
   opacity: 0;
+}
+
+.star-rating-color {
+  color: #ff9529;
+}
+
+.remove-icon-position {
+  position: absolute;
+  padding-left: 5px;
 }
 </style>
