@@ -100,6 +100,15 @@
               ></i>
             </button>
           </h3>
+          <div
+            class="sidebar-card mb-3"
+            v-if="Object.keys(facetData).length !== 0"
+          >
+            <FacetWordCloud
+              :default-words="cloudWords"
+              v-on:wordClicked="toggleFilter"
+            ></FacetWordCloud>
+          </div>
           <div class="sidebar-card">
             <div v-if="Object.keys(facetData).length === 0">
               <Loading></Loading>
@@ -189,7 +198,8 @@
                 v-on:click="sortSimilarObjects(item.cluster_id)"
               >
                 <div v-if="!similarActive">
-                  <i class="fas fa-greater-than-equal"></i> show similar records
+                  <i class="fas fa-greater-than-equal"></i> show
+                  {{ clusterMap[item.cluster_id] }} similar records
                 </div>
                 <div v-if="similarActive">
                   <i class="fas fa-less-than-equal"></i> show all records
@@ -501,9 +511,18 @@ export default {
       let facet = {};
       let facetClusterNumber = {};
 
+      let clusterMap = {};
+
       for (let i = 0; i < obj.length; i++) {
         let clusterData = obj[i].data;
         let clusterId = obj[i].cluster_id;
+
+        if (clusterId in clusterMap) {
+          clusterMap[clusterId]++;
+        } else {
+          clusterMap[clusterId] = 1;
+        }
+
         for (let j = 0; j < clusterData.length; j++) {
           if (clusterData[j] in facet) {
             facet[clusterData[j]]++;
@@ -516,6 +535,8 @@ export default {
           }
         }
       }
+
+      this.clusterMap = clusterMap;
 
       this.facetClusterNumber = facetClusterNumber;
       let keys = Object.keys(facet);
@@ -1051,7 +1072,7 @@ export default {
   }
 
   text-align: center;
-  width: 200px;
+  width: 230px;
   padding: 5px 10px;
   border-radius: 0 3px 0 3px;
 }
