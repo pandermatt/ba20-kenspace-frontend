@@ -264,12 +264,13 @@
 </template>
 
 <script>
+import FacetWordCloud from "./FacetWordCloud";
+import FeedbackButtons from "./FeedbackButtons";
 import Footer from "./Footer";
+import LandingPage from "./LandingPage";
 import Loading from "./Loading";
 import ProgressBar from "./ProgressBar";
-import FeedbackButtons from "./FeedbackButtons";
 import Upload from "./Upload";
-import LandingPage from "./LandingPage";
 
 export default {
   name: "Home",
@@ -279,7 +280,8 @@ export default {
     FeedbackButtons,
     ProgressBar,
     Loading,
-    Footer
+    Footer,
+    FacetWordCloud
   },
   props: {
     msg: String
@@ -305,7 +307,9 @@ export default {
       similarActive: false,
       currentClusterId: null,
       upload: false,
-      removeFilterFunc: null
+      removeFilterFunc: null,
+      cloudWords: [],
+      clusterMap: []
     };
   },
   computed: {
@@ -519,6 +523,16 @@ export default {
       this.tagsSameAsResult = keys.every(val => facet[val] === results);
 
       this.facetData = this.sortObject(facet);
+
+      let sortedKeys = Object.keys(this.facetData);
+      let words = [];
+      for (let i = 0; i < 100; i++) {
+        words.push({
+          name: sortedKeys[i],
+          value: facet[sortedKeys[i]]
+        });
+      }
+      this.cloudWords = words;
     },
     changeSort: function() {
       this.sortABC = !this.sortABC;
