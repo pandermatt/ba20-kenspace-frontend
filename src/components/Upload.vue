@@ -110,7 +110,7 @@
         <table class="table mt-2 mb-2">
           <thead>
             <tr>
-              <th scope="col">Display Text</th>
+              <th scope="col">Title</th>
               <th scope="col">Content</th>
             </tr>
           </thead>
@@ -141,13 +141,6 @@
             </tr>
           </tbody>
         </table>
-        <div
-          class="alert alert-danger"
-          role="alert"
-          v-if="(pickedContent === '' || pickedDisplay === '') && validated"
-        >
-          Select columns to analyse
-        </div>
         <h3 class="mt-4 mb-2">Data Language</h3>
         <p class="font-italic">
           The language of your data looks like
@@ -162,6 +155,7 @@
                 name="language"
                 :value="c"
                 v-model="language"
+                v-on:change="calculatePerformance"
               />{{ c }}
             </label>
           </p>
@@ -171,6 +165,7 @@
             <label class="upload-label">
               <input
                 v-on:click="techniques = 'auto'"
+                v-on:change="calculatePerformance"
                 class="mr-2"
                 type="radio"
                 name="language"
@@ -191,6 +186,7 @@
                 name="techniques"
                 value="auto"
                 v-model="techniques"
+                v-on:change="calculatePerformance"
               />Choose automatically
               <span class="text-muted font-italic ml-2">Fastest</span>
             </label>
@@ -205,6 +201,7 @@
                 name="techniques"
                 value="nltk"
                 v-model="techniques"
+                v-on:change="calculatePerformance"
                 :disabled="!['german', 'english'].includes(language)"
               />NLTK
               <span class="text-muted font-italic ml-2"
@@ -222,6 +219,7 @@
                 name="techniques"
                 value="spacy"
                 v-model="techniques"
+                v-on:change="calculatePerformance"
                 :disabled="!['german', 'english'].includes(language)"
               />SpaCy
               <span class="text-muted font-italic ml-2"
@@ -249,6 +247,7 @@
                 name="clusterSize"
                 value="large"
                 v-model="clusterSize"
+                v-on:change="calculatePerformance"
               />Large
               <span class="text-muted font-italic ml-2"
                 >This will result in {{ recommendationSet["large"][0] }} items
@@ -267,6 +266,7 @@
                 name="clusterSize"
                 value="medium"
                 v-model="clusterSize"
+                v-on:change="calculatePerformance"
               />Medium
               <span class="text-muted font-italic ml-2"
                 >This will result in {{ recommendationSet["medium"][0] }} items
@@ -285,6 +285,7 @@
                 name="clusterSize"
                 value="small"
                 v-model="clusterSize"
+                v-on:change="calculatePerformance"
               />Small
               <span class="text-muted font-italic ml-2"
                 >This will result in {{ recommendationSet["small"][0] }} items
@@ -294,12 +295,71 @@
             >
           </p>
         </div>
+
+        <h3 class="mt-4 mb-2">Items To Analyse</h3>
+        <div>
+          <p>
+            <label>
+              <input
+                class="mr-2"
+                type="radio"
+                name="itemToAnalyse"
+                value="content"
+                v-model="itemToAnalyse"
+                v-on:change="calculatePerformance"
+              />Only Content
+              <span
+                class="text-muted font-italic ml-2 upload-label"
+                v-if="pickedContent"
+                >{{ pickedContent }}, Fast</span
+              >
+            </label>
+          </p>
+        </div>
+        <div>
+          <p>
+            <label>
+              <input
+                class="mr-2"
+                type="radio"
+                name="itemToAnalyse"
+                value="all"
+                v-model="itemToAnalyse"
+                v-on:change="calculatePerformance"
+              />Title & Content
+              <span
+                class="text-muted font-italic ml-2 upload-label"
+                v-if="pickedContent && pickedDisplay"
+                >{{ pickedDisplay }} & {{ pickedContent }}, <b>Slow</b></span
+              >
+            </label>
+          </p>
+        </div>
+
+        <h1>Data Processing Speed</h1>
+        <p><b>Fast</b>: A data set generation can take up to 2 minutes.</p>
+        <p><b>Average</b>: A data set generation can take up to 7 minutes.</p>
+        <p><b>Slow</b>: A data set generation can take up to 15 minutes.</p>
+        <VueSvgGauge
+          :start-angle="-110"
+          :end-angle="110"
+          :value="performance"
+          :separator-step="2"
+          :scale-interval="1"
+          :inner-radius="80"
+          :max="6"
+          easing="Bounce.Out"
+        >
+          <div class="inner-text">
+            <span>{{ performanceMessage }}</span>
+          </div>
+        </VueSvgGauge>
         <div
           class="alert alert-danger"
           role="alert"
-          v-if="clusterSize === 'small' && this.techniques === 'spacy'"
+          v-if="(pickedContent === '' || pickedDisplay === '') && validated"
         >
-          This will take a lot of time...
+          Select columns to analyse
         </div>
         <button @click="start" class="btn btn-primary">Start</button>
       </div>
@@ -309,11 +369,13 @@
 <script>
 import vue2Dropzone from "vue2-dropzone";
 import "vue2-dropzone/dist/vue2Dropzone.min.css";
+import { VueSvgGauge } from "vue-svg-gauge";
 
 export default {
   name: "Upload",
   components: {
-    vueDropzone: vue2Dropzone
+    vueDropzone: vue2Dropzone,
+    VueSvgGauge
   },
   data: function() {
     return {
@@ -326,11 +388,14 @@ export default {
       originalLanguage: "",
       techniques: "",
       clusterSize: "",
+      itemToAnalyse: "",
       recommendationSet: "",
       showWarning: true,
       selectedUploadData: "csv",
       validated: false,
-      dataSourceSelected: false
+      dataSourceSelected: false,
+      performance: 0,
+      performanceMessage: ""
     };
   },
   methods: {
@@ -344,7 +409,9 @@ export default {
       this.language = result["language"];
       this.filename = result["filename"];
       this.clusterSize = "medium";
+      this.itemToAnalyse = "content";
       this.recommendationSet = result["recommendationSet"];
+      this.calculatePerformance();
     },
     start() {
       this.validated = true;
@@ -353,7 +420,8 @@ export default {
         this.pickedDisplay === "" ||
         this.language === "" ||
         this.techniques === "" ||
-        this.clusterSize === ""
+        this.clusterSize === "" ||
+        this.itemToAnalyse === ""
       ) {
         return;
       }
@@ -369,9 +437,47 @@ export default {
         filename: this.filename,
         language: this.language,
         techniques: this.techniques,
-        clusterSize: this.clusterSize
+        clusterSize: this.clusterSize,
+        itemToAnalyse: this.itemToAnalyse
       });
       this.$emit("finished");
+    },
+    calculatePerformance() {
+      let performance = 0;
+
+      switch (this.techniques) {
+        case "auto":
+          performance += 2;
+          break;
+        case "nltk":
+          performance += 1;
+          break;
+      }
+
+      switch (this.clusterSize) {
+        case "large":
+          performance += 2;
+          break;
+        case "medium":
+          performance += 1;
+          break;
+      }
+
+      switch (this.itemToAnalyse) {
+        case "content":
+          performance += 2;
+          break;
+      }
+
+      if (performance >= 5) {
+        this.performanceMessage = "Fast";
+      } else if (performance >= 3) {
+        this.performanceMessage = "Average";
+      } else {
+        this.performanceMessage = "Slow";
+      }
+
+      this.performance = performance;
     },
     failed(file) {
       const message = JSON.parse(file.xhr.response).message;
@@ -468,6 +574,25 @@ export default {
 
   &:hover {
     text-decoration: underline;
+  }
+}
+
+.gauge {
+  max-width: 300px;
+  margin: auto;
+  padding: 20px 0;
+
+  .inner-text {
+    height: 100%;
+    width: 100%;
+
+    span {
+      text-align: center;
+      position: absolute;
+      top: 70px;
+      width: 100px;
+      left: 50px;
+    }
   }
 }
 </style>

@@ -547,7 +547,7 @@ export default {
 
       let sortedKeys = Object.keys(this.facetData);
       let words = [];
-      for (let i = 0; i < 100; i++) {
+      for (let i = 0; i < 150; i++) {
         words.push({
           name: sortedKeys[i],
           value: facet[sortedKeys[i]]
