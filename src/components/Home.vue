@@ -546,8 +546,12 @@ export default {
       this.facetData = this.sortObject(facet);
 
       let sortedKeys = Object.keys(this.facetData);
+      let lenKeys = sortedKeys.length;
       let words = [];
       for (let i = 0; i < 150; i++) {
+        if (i > lenKeys) {
+          break;
+        }
         words.push({
           name: sortedKeys[i],
           value: facet[sortedKeys[i]]
