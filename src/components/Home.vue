@@ -546,8 +546,12 @@ export default {
       this.facetData = this.sortObject(facet);
 
       let sortedKeys = Object.keys(this.facetData);
+      let lenKeys = sortedKeys.length;
       let words = [];
       for (let i = 0; i < 150; i++) {
+        if (i > lenKeys) {
+          break;
+        }
         words.push({
           name: sortedKeys[i],
           value: facet[sortedKeys[i]]
@@ -621,7 +625,8 @@ export default {
     clearFiltered: function() {
       this.noResults = false;
       this.filterByList = [];
-      this.queriesData = [...this.originalQueriesData];
+      // this.queriesData = [...this.originalQueriesData];
+      this.queriesData = this.originalQueriesData.slice(0);
       this.groupCluster();
       this.filterBySearch();
       this.generateFacet(this.queriesData);
@@ -645,12 +650,17 @@ export default {
     removeFilter: function(item) {
       this.noResults = false;
       this.filterByList = this.filterByList.filter(e => e !== item);
-      this.queriesData = [...this.originalQueriesData];
+
+      // this.queriesData = [...this.originalQueriesData];
+      let queriesData = this.originalQueriesData.slice(0);
+
       for (let i = 0; i < this.filterByList.length; i++) {
-        this.queriesData = this.queriesData.filter(result =>
+        queriesData = queriesData.filter(result =>
           result["data"].includes(this.filterByList[i])
         );
       }
+      this.queriesData = queriesData;
+
       this.groupCluster();
 
       this.filterBySearch();
@@ -708,7 +718,8 @@ export default {
     },
     search: function() {
       if (this.searchText === "") {
-        this.queriesData = [...this.originalQueriesData];
+        // this.queriesData = [...this.originalQueriesData];
+        this.queriesData = this.originalQueriesData.slice(0);
         this.removeFilter("");
         return;
       }
