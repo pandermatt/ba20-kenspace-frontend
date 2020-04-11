@@ -1,18 +1,16 @@
 <template>
-  <div id="app">
-    <wordcloud
-      :data="defaultWords"
-      nameKey="name"
-      valueKey="value"
-      spiral="rectangular"
-      :color="myColors"
-      :margin="margin"
-      :showTooltip="false"
-      :rotate="rotate"
-      :wordClick="wordClickHandler"
-    >
-    </wordcloud>
-  </div>
+  <wordcloud
+    :data="defaultWords"
+    nameKey="name"
+    valueKey="value"
+    spiral="rectangular"
+    :color="myColors"
+    :margin="margin"
+    :showTooltip="false"
+    :rotate="rotate"
+    :wordClick="wordClickHandler"
+  >
+  </wordcloud>
 </template>
 
 <script>
