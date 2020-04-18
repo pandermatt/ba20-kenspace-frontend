@@ -7,5 +7,10 @@ module.exports = {
         prependData: `@import "@/scss/_variables.scss";`
       }
     }
+  },
+
+  pwa: {
+    name: "KenSpace",
+    themeColor: "#0099ff"
   }
 };

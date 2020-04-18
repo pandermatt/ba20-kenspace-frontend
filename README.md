@@ -1,4 +1,4 @@
-# BA20 KenSpace Frontend
+# 🕵🏼‍♂️ BA20 KenSpace Frontend
 
 KenSpace: Explorative und komplexe Suchen auf unstrukturierte Dokumente
 
