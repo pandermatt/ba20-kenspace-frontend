@@ -959,6 +959,7 @@ export default {
     position: absolute;
     display: block;
     height: 100%;
+    width: 200px;
     padding: 0;
 
     img {
