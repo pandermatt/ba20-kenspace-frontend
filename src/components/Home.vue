@@ -204,6 +204,12 @@
                 <div v-if="similarActive">
                   <i class="fas fa-less-than-equal"></i> show all records
                 </div>
+                <span
+                  v-for="(topic, idx) in clusterTopicData[item.cluster_id]"
+                  v-bind:key="idx"
+                  class="badge badge-pill badge-light mr-1"
+                  >{{ topic }}
+                </span>
               </div>
               <div class="card-header" v-if="item.meta_info.image">
                 <img :src="item.meta_info.image" alt="Movie Cover" />
@@ -305,6 +311,7 @@ export default {
       deletedList: [],
       queriesData: [],
       facetData: {},
+      clusterTopicData: {},
       facetClusterNumber: {},
       maxFacetClusterNumber: null,
       queryLimit: 10,
@@ -487,6 +494,15 @@ export default {
           vueApp.originalQueriesData = response.data["results"];
           vueApp.queriesData = response.data["results"];
           vueApp.modelUuid = response.data["uuid"];
+
+          let responseTopicData = response.data["topics"];
+          let topicData = {};
+          for (let j = 0; j < responseTopicData.length; j++) {
+            topicData[responseTopicData[j].cluster_id] =
+              responseTopicData[j].data;
+          }
+          vueApp.clusterTopicData = topicData;
+
           localStorage.modelUuid = response.data["uuid"];
 
           vueApp.removeFilter("");
@@ -839,10 +855,6 @@ export default {
   top: -80px;
 }
 
-.container {
-  transition: all 0.3s ease-in-out;
-}
-
 .hamburger .line {
   @media (min-width: 768px) {
     opacity: 0;
@@ -1078,6 +1090,13 @@ export default {
   right: 0;
   background-color: #0099ff;
   color: white;
+  height: 32px;
+  overflow: hidden;
+  transition: height 0.2s;
+
+  &:hover {
+    height: 60px;
+  }
 
   &.active {
     background-color: #28a745;
