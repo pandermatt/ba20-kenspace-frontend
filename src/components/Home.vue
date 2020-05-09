@@ -23,7 +23,7 @@
           <button v-on:click="resetApp" class="link-style">
             reset & generate new model
           </button>
-          <div class="row" v-if="!upload">
+          <div class="row" v-if="!upload && !cityChooser">
             <div class="col-md-6">
               <div class="display-filter">
                 <b>picked</b> <span v-if="filterByList.length === 0">none</span>
@@ -75,7 +75,8 @@
       </div>
     </div>
     <Upload v-if="apiKey && upload" v-on:finished="loadContent" />
-    <div v-if="apiKey && !upload" class="home-box">
+    <CityChooser v-if="apiKey && cityChooser" v-on:finished="loadContent" />
+    <div v-if="apiKey && !upload && !cityChooser" class="home-box">
       <div
         class="hamburger cursor-pointer"
         id="hamburger-circle"
@@ -287,10 +288,12 @@ import LandingPage from "./LandingPage";
 import Loading from "./Loading";
 import ProgressBar from "./ProgressBar";
 import Upload from "./Upload";
+import CityChooser from "./CityCooser";
 
 export default {
   name: "Home",
   components: {
+    CityChooser,
     LandingPage,
     Upload,
     FeedbackButtons,
@@ -324,6 +327,7 @@ export default {
       similarActive: false,
       currentClusterId: null,
       upload: false,
+      cityChooser: false,
       removeFilterFunc: null,
       cloudWords: [],
       clusterMap: []
@@ -396,6 +400,8 @@ export default {
 
               if (password.split(":")[1] === "custom") {
                 vueApp.upload = true;
+              } else if (password.split(":")[1] === "AirBnBDb") {
+                vueApp.cityChooser = true;
               } else {
                 vueApp.loadContent();
               }
@@ -423,6 +429,8 @@ export default {
       this.facetLimit = 200;
       this.queryLimit = 10;
       this.searchText = "";
+      this.upload = false;
+      this.cityChooser = false;
       localStorage.settings = "";
       this.similarActive = false;
       const Swal = require("sweetalert2");
@@ -470,6 +478,7 @@ export default {
       const axios = require("axios");
       const Swal = require("sweetalert2");
       this.upload = false;
+      this.cityChooser = false;
       const vueApp = this;
       let params = {};
       if (localStorage.modelUuid) {
