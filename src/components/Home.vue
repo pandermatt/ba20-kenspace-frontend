@@ -221,6 +221,13 @@
               >
                 <h5 class="card-title card-title-similar">
                   {{ item.text }}
+                  <a
+                    :href="item.meta_info.data_url"
+                    target="_blank"
+                    class="badge badge-light mr-2"
+                    v-if="item.meta_info.data_url"
+                    >Open <i class="fas fa-external-link-alt"></i
+                  ></a>
                   <span
                     class="badge badge-light"
                     v-if="item.meta_info.release_date"
