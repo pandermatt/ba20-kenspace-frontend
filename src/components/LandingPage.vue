@@ -63,6 +63,26 @@
         </div>
       </div>
     </div>
+    <div class="container" style="margin-bottom: 80px;">
+      <hr style="width: 70%;" />
+      <div style="max-width: 560px; padding-bottom: 40px; margin: auto">
+        <h1
+          class="text-center"
+          style="padding: 25px 0; color: #0099ff; font-weight: 400"
+        >
+          What is KenSpace?
+        </h1>
+        <iframe
+          width="100%"
+          height="315"
+          src="https://www.youtube-nocookie.com/embed/nUNzGW0g6Cw"
+          frameborder="0"
+          allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+        ></iframe>
+      </div>
+      <hr style="width: 70%;" />
+    </div>
     <div class="container">
       <h1><i class="fas fa-chevron-right"></i> Get started!</h1>
       <p class="lead">
