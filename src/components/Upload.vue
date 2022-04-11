@@ -150,6 +150,7 @@
           <p>
             <label class="upload-label">
               <input
+                v-on:click="secondLanguage = 'none'"
                 class="mr-2"
                 type="radio"
                 name="language"
@@ -164,7 +165,10 @@
           <p>
             <label class="upload-label">
               <input
-                v-on:click="techniques = 'auto'"
+                v-on:click="
+                  techniques = 'auto';
+                  secondLanguage = 'none';
+                "
                 v-on:change="calculatePerformance"
                 class="mr-2"
                 type="radio"
@@ -172,6 +176,29 @@
                 :value="originalLanguage"
                 v-model="language"
               />{{ originalLanguage }}
+            </label>
+          </p>
+        </div>
+
+        <p class="font-italic">
+          Second Language
+          <span class="text-muted font-italic ml-2"
+            >You may want to set a second language</span
+          >
+        </p>
+        <div v-for="(c, idx) in ['none', 'german', 'english']" v-bind:key="idx">
+          <p>
+            <label class="upload-label">
+              <input
+                v-on:click="techniques = 'auto'"
+                class="mr-2"
+                type="radio"
+                name="secondLanguage"
+                :value="c"
+                :disabled="c === language"
+                v-model="secondLanguage"
+                v-on:change="calculatePerformance"
+              />{{ c }}
             </label>
           </p>
         </div>
@@ -202,7 +229,10 @@
                 value="nltk"
                 v-model="techniques"
                 v-on:change="calculatePerformance"
-                :disabled="!['german', 'english'].includes(language)"
+                :disabled="
+                  !['german', 'english'].includes(language) ||
+                    secondLanguage !== 'none'
+                "
               />NLTK
               <span class="text-muted font-italic ml-2"
                 >Analyse Text based on Language Features, Fast</span
@@ -220,7 +250,10 @@
                 value="spacy"
                 v-model="techniques"
                 v-on:change="calculatePerformance"
-                :disabled="!['german', 'english'].includes(language)"
+                :disabled="
+                  !['german', 'english'].includes(language) ||
+                    secondLanguage !== 'none'
+                "
               />SpaCy
               <span class="text-muted font-italic ml-2"
                 >Analyse Text based on Connections, <b>Slow</b></span
@@ -235,6 +268,14 @@
         >
           <span class="upload-label">{{ language }}</span> does not support
           user-defined "Language Analysis Techniques"
+        </div>
+        <div
+          class="alert alert-warning"
+          role="alert"
+          v-if="secondLanguage !== 'none'"
+        >
+          A second language does not support user-defined "Language Analysis
+          Techniques"
         </div>
 
         <h3 class="mt-4 mb-2">Recommendation Set Size</h3>
@@ -385,6 +426,7 @@ export default {
       pickedContent: "",
       filename: "",
       language: "",
+      secondLanguage: "",
       originalLanguage: "",
       techniques: "",
       clusterSize: "",
@@ -405,6 +447,7 @@ export default {
       this.techniques = "auto";
       this.pickedDisplay = "";
       this.pickedContent = "";
+      this.secondLanguage = "none";
       this.originalLanguage = result["language"];
       this.language = result["language"];
       this.filename = result["filename"];
@@ -419,6 +462,7 @@ export default {
         this.pickedContent === "" ||
         this.pickedDisplay === "" ||
         this.language === "" ||
+        this.secondLanguage === "" ||
         this.techniques === "" ||
         this.clusterSize === "" ||
         this.itemToAnalyse === ""
@@ -436,6 +480,7 @@ export default {
         content: this.pickedContent,
         filename: this.filename,
         language: this.language,
+        secondLanguage: this.secondLanguage,
         techniques: this.techniques,
         clusterSize: this.clusterSize,
         itemToAnalyse: this.itemToAnalyse
